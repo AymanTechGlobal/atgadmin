@@ -11,10 +11,10 @@ import {
   Button,
   Typography,
 } from "@mui/material";
-import { Logout } from "@mui/icons-material";
+import { Logout, Menu } from "@mui/icons-material";
 import axios from "axios";
 
-const Header = () => {
+const Header = ({ isSidebarOpen, setIsSidebarOpen }) => {
   const navigate = useNavigate();
   const [openDialog, setOpenDialog] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -34,15 +34,11 @@ const Header = () => {
         }
       );
 
-      // Clear local storage
       localStorage.removeItem("token");
       localStorage.removeItem("user");
-
-      // Navigate to login page
       navigate("/");
     } catch (error) {
       console.error("Logout error:", error);
-      // Even if the server request fails, we'll still clear local storage and redirect
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       navigate("/");
@@ -64,7 +60,7 @@ const Header = () => {
     <>
       <Box
         display="flex"
-        justifyContent="flex-end"
+        justifyContent="space-between"
         alignItems="center"
         p="1rem"
         position="fixed"
@@ -75,6 +71,12 @@ const Header = () => {
         backgroundColor="white"
         boxShadow="0 1px 3px rgba(0,0,0,0.1)"
       >
+        <IconButton
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          sx={{ color: "primary.main" }}
+        >
+          <Menu />
+        </IconButton>
         <Box display="flex" alignItems="center" gap="1rem">
           <Avatar
             alt="Profile"
