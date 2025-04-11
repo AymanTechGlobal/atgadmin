@@ -10,6 +10,7 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  useMediaQuery,
 } from "@mui/material";
 import {
   SettingsOutlined,
@@ -28,20 +29,32 @@ import { useLocation, useNavigate } from "react-router-dom";
 import FlexBetween from "./FlexBetween";
 
 const navItems = [
-  { text: "Dashboard", icon: <HomeOutlined /> },
+  { text: "Dashboard", icon: <HomeOutlined />, path: "/dashboard" },
   { text: "Management Tools", icon: null },
-  { text: "Care Navigators", icon: <PeopleOutlined /> },
-  { text: "Care Plans", icon: <ReceiptOutlined /> },
-  { text: "Event Logs", icon: <EventOutlined /> },
-  { text: "Messages", icon: <MessageOutlined /> },
+  {
+    text: "Care Navigators",
+    icon: <PeopleOutlined />,
+    path: "/care-navigators",
+  },
+  { text: "Care Plans", icon: <ReceiptOutlined />, path: "/care-plans" },
+  { text: "Event Logs", icon: <EventOutlined />, path: "/event-logs" },
+  { text: "Messages", icon: <MessageOutlined />, path: "/messages" },
   { text: "System Analytics", icon: null },
-  { text: "Reports", icon: <BarChartOutlined /> },
-  { text: "User Management", icon: <ManageAccountsOutlined /> },
-  { text: "User Engagement", icon: <BarChartOutlined /> },
-  { text: "System Settings", icon: <SettingsOutlined /> },
+  { text: "Reports", icon: <BarChartOutlined />, path: "/reports" },
+  {
+    text: "User Management",
+    icon: <ManageAccountsOutlined />,
+    path: "/user-management",
+  },
+  {
+    text: "User Engagement",
+    icon: <BarChartOutlined />,
+    path: "/user-engagement",
+  },
+  { text: "System Settings", icon: <SettingsOutlined />, path: "/settings" },
   { text: "Transactions", icon: null },
-  { text: "Invoices", icon: <ReceiptOutlined /> },
-  { text: "Payments", icon: <PaymentOutlined /> },
+  { text: "Invoices", icon: <ReceiptOutlined />, path: "/invoices" },
+  { text: "Payments", icon: <PaymentOutlined />, path: "/payments" },
 ];
 
 const Sidebar = ({
@@ -54,9 +67,10 @@ const Sidebar = ({
   const [active, setActive] = useState("");
   const navigate = useNavigate();
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
-    setActive(pathname.substring(1));
+    setActive(pathname);
   }, [pathname]);
 
   return (
@@ -76,8 +90,9 @@ const Sidebar = ({
             borderRadius: "0 2rem 2rem 0",
             boxShadow: "0.15rem 0.2rem 0.15rem 0.1rem rgba(0, 0, 0, 0.8)",
             width: drawerWidth,
-            position: "relative",
+            position: "fixed",
             height: "100vh",
+            transition: "all 0.3s ease",
           },
         }}
       >
@@ -85,7 +100,7 @@ const Sidebar = ({
           <Box m="1.5rem 2rem 2rem 3rem">
             <FlexBetween color={theme.palette.secondary.main}>
               <Box display="flex" alignItems="center" gap="0.5rem">
-                <Typography variant="h3" fontWeight="bold">
+                <Typography variant="h4" fontWeight="bold">
                   ATG ADMIN
                 </Typography>
                 {isNonMobile && (
@@ -98,7 +113,7 @@ const Sidebar = ({
           </Box>
 
           <List>
-            {navItems.map(({ text, icon }) => {
+            {navItems.map(({ text, icon, path }) => {
               if (!icon) {
                 return (
                   <Typography
@@ -108,22 +123,19 @@ const Sidebar = ({
                     fontWeight="bold"
                     color={theme.palette.secondary.main}
                   >
-                    <Divider />
                     {text}
                   </Typography>
                 );
               }
 
-              const isActive = active === text.toLowerCase().replace(" ", "-");
+              const isActive = active === path;
 
               return (
                 <ListItem key={text} disablePadding>
                   <ListItemButton
                     onClick={() => {
-                      const path = text.toLowerCase().replace(" ", "-");
-                      navigate(`/${path}`);
-                      setActive(path);
-                      if (!isNonMobile) setIsSidebarOpen(false);
+                      navigate(path);
+                      if (isMobile) setIsSidebarOpen(false);
                     }}
                     sx={{
                       backgroundColor: isActive

@@ -24,8 +24,9 @@ const Layout = () => {
           flexDirection: "column",
           flexGrow: 1,
           minHeight: "100vh",
-          width: isSidebarOpen ? "calc(100% - 250px)" : "100%",
+          width: isSidebarOpen ? "calc(100% - 300px)" : "100%",
           transition: "width 0.3s ease",
+          ml: isSidebarOpen ? "300px" : 0,
         }}
       >
         <Header

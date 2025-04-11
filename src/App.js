@@ -9,6 +9,7 @@ import ResetPassword from "./pages/ResetPassword";
 import "./index.css";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Layout from "./layouts/Layout";
+import CareNavigators from "./pages/CareNavigators";
 
 function App() {
   return (
@@ -19,15 +20,15 @@ function App() {
           <Route path="/" element={<Login />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route
-            path="/dashboard"
             element={
               <ProtectedRoute>
-                <Layout>
-                  <Dashboard />
-                </Layout>
+                <Layout />
               </ProtectedRoute>
             }
-          />
+          >
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/care-navigators" element={<CareNavigators />} />
+          </Route>
         </Routes>
       </Router>
     </ThemeProvider>
