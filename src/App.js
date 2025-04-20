@@ -10,6 +10,8 @@ import "./index.css";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Layout from "./layouts/Layout";
 import CareNavigators from "./pages/CareNavigators";
+import Appointments from "./pages/Appointments";
+
 
 function App() {
   return (
@@ -28,6 +30,7 @@ function App() {
           >
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/care-navigators" element={<CareNavigators />} />
+            <Route path="/appointment" element={<Appointments/>} />
           </Route>
         </Routes>
       </Router>
