@@ -233,6 +233,7 @@ const CareNavigators = () => {
         </Table>
       </TableContainer>
 
+       {/*  this is for new care navigator creation */ }
       <Dialog open={openDialog} onClose={handleCloseDialog}>
         <DialogTitle>
           {selectedNavigator ? "Edit Care Navigator" : "Add Care Navigator"}
