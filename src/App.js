@@ -11,7 +11,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Layout from "./layouts/Layout";
 import CareNavigators from "./pages/CareNavigators";
 import Appointments from "./pages/Appointments";
-
+import CarePlans from "./pages/CarePlans";
 
 function App() {
   return (
@@ -30,7 +30,8 @@ function App() {
           >
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/care-navigators" element={<CareNavigators />} />
-            <Route path="/appointment" element={<Appointments/>} />
+            <Route path="/appointment" element={<Appointments />} />
+            <Route path="/careplans" element={<CarePlans/>} />
           </Route>
         </Routes>
       </Router>

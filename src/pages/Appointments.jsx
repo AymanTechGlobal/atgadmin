@@ -25,13 +25,11 @@ import {
 } from "@mui/material";
 import {
   Search as SearchIcon,
-  Add as AddIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
 } from "@mui/icons-material";
 import axios from "axios";
 import { width } from "@mui/system";
-
 
 const API_URL = "http://localhost:5000/api/client/appointments";
 
@@ -209,8 +207,16 @@ const Appointments = () => {
                 <TableCell>{appointment.careNeed}</TableCell>
                 <TableCell>{appointment.CareNavigator}</TableCell>
                 <TableCell>{appointment.Doctor}</TableCell>
-                <TableCell>{appointment.appointmentDate}</TableCell>
-                <TableCell>{appointment.appointmentTime}</TableCell>
+                <TableCell>
+                  {new Date(appointment.appointmentDate).toLocaleDateString()}
+                </TableCell>
+
+                <TableCell>
+                  {new Date(appointment.appointmentTime).toLocaleTimeString(
+                    [],
+                    { hour: "2-digit", minute: "2-digit" }
+                  )}
+                </TableCell>
                 <TableCell>{appointment.status}</TableCell>
                 <TableCell>
                   <IconButton
