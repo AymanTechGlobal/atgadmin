@@ -64,7 +64,7 @@ const Header = ({ isSidebarOpen, setIsSidebarOpen }) => {
         position="fixed"
         sx={{
           width: { sm: `calc(100% - ${isSidebarOpen ? "300px" : "0px"})` },
-          ml: { sm: `${isSidebarOpen ? "300px" : "0px"}` },
+          ml: { sm: `${isSidebarOpen ? "250px" : "0px"}` },
           transition: "all 0.3s ease",
           backgroundColor: "white",
           color: "black",

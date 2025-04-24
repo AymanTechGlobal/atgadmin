@@ -37,7 +37,7 @@ const navItems = [
     path: "/care-navigators",
   },
   { text: "Care Plans", icon: <ReceiptOutlined />, path: "/care-plans" },
-  { text: "Event Logs", icon: <EventOutlined />, path: "/event-logs" },
+  { text: "Appointments", icon: <EventOutlined />, path: "/appointment" },
   { text: "Messages", icon: <MessageOutlined />, path: "/messages" },
   { text: "System Analytics", icon: null },
   { text: "Reports", icon: <BarChartOutlined />, path: "/reports" },

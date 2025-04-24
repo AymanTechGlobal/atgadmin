@@ -22,16 +22,23 @@ import {
   InputAdornment,
   Alert,
   Snackbar,
+  CircularProgress,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
 import {
   Search as SearchIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
 } from "@mui/icons-material";
+import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import axios from "axios";
-import { width } from "@mui/system";
-
-const API_URL = "http://localhost:5000/api/client/appointments";
+import { spacing } from "@mui/system";
+const API_URL = "http://localhost:5000/api/appointments";
 
 //  end points
 //  /appointment
@@ -47,10 +54,11 @@ const Appointments = () => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [formData, setFormData] = useState({
-    appointmentDate: "",
-    appointmentTime: "",
+    appointmentDate: new Date(),
+    appointmentTime: new Date(),
     status: "Scheduled",
     Doctor: "",
+    notes: "",
   });
 
   useEffect(() => {
@@ -58,6 +66,7 @@ const Appointments = () => {
   }, []);
 
   const fetchAppointments = async () => {
+    setLoading(true);
     try {
       const response = await axios.get(API_URL);
       if (response.data.success) {
@@ -66,6 +75,8 @@ const Appointments = () => {
     } catch (error) {
       setError("Error fetching appointments");
       console.error("Error fetching appointments:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -77,18 +88,20 @@ const Appointments = () => {
     if (appointment) {
       setSelectedAppointment(appointment);
       setFormData({
-        appointmentDate: appointment.appointmentDate,
-        appointmentTime: appointment.appointmentTime,
+        appointmentDate: new Date(appointment.appointmentDate),
+        appointmentTime: new Date(appointment.appointmentTime),
         status: appointment.status,
         Doctor: appointment.Doctor,
+        notes: appointment.notes || "",
       });
     } else {
       setSelectedAppointment(null);
       setFormData({
-        appointmentDate: "",
-        appointmentTime: "",
+        appointmentDate: new Date(),
+        appointmentTime: new Date(),
         status: "Scheduled",
         Doctor: "",
+        notes: "",
       });
     }
     setOpenDialog(true);
@@ -108,37 +121,44 @@ const Appointments = () => {
     }));
   };
 
+  const handleDateChange = (newValue, field) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      [field]: newValue,
+    }));
+  };
+
   const handleSubmit = async () => {
     setLoading(true);
     setError(null);
     try {
+      const dataToSend = {
+        ...formData,
+        appointmentDate: formData.appointmentDate.toISOString(),
+        appointmentTime: formData.appointmentTime.toISOString(),
+      };
+
       if (selectedAppointment) {
-        // update the existing appointment
         const response = await axios.put(
           `${API_URL}/${selectedAppointment._id}`,
-          formData
+          dataToSend
         );
         if (response.data.success) {
           setSuccess("Appointment updated successfully");
           fetchAppointments();
           handleCloseDialog();
-        } else {
-          setError("Error updating appointment");
         }
       }
     } catch (error) {
-      if (error.response && error.response.data) {
-        setError(error.response.data.message);
-      } else {
-        setError(error.response?.data?.message || "Error updating appointment");
-      }
+      setError(error.response?.data?.message || "Error updating appointment");
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (appointmentId) => {
-    if (window.confirm("Are you sure, you want to delete this appointment?")) {
+    if (window.confirm("Are you sure you want to delete this appointment?")) {
+      setLoading(true);
       try {
         const response = await axios.delete(`${API_URL}/${appointmentId}`);
         if (response.data.success) {
@@ -148,6 +168,8 @@ const Appointments = () => {
       } catch (error) {
         setError("Error deleting appointment");
         console.error("Error deleting appointment:", error);
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -159,84 +181,186 @@ const Appointments = () => {
 
   const filteredAppointments = appointments.filter(
     (appointment) =>
-      appointment.appointmentId.includes(searchTerm.toLowerCase()) ||
-      appointment.Doctor.toLowerCase().includes(searchTerm.toLowerCase())
+      appointment.appointmentId
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      appointment.Doctor?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      appointment.patientName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <Box sx={{ padding: 2 }}>
-      <Typography variant="h4" gutterBottom>
+    <Box sx={{  pt: 10 , paddingRight:10}}>
+      <Typography variant="h4" className="mb-4 text-center">
         Appointments
       </Typography>
-      <TextField
-        variant="outlined"
-        placeholder="Search by appointment ID or doctor name"
-        value={searchTerm}
-        onChange={handleSearch}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <SearchIcon />
-            </InputAdornment>
-          ),
-        }}
-        fullWidth
-        sx={{ marginBottom: 2 }}
-      />
 
-      <TableContainer component={Paper} sx={{ marginTop: 2 }}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Appointment ID</TableCell>
-              <TableCell>PatientName</TableCell>
-              <TableCell>Care Need</TableCell>
-              <TableCell>Care Navigator</TableCell>
-              <TableCell>Doctor</TableCell>
-              <TableCell>Appointment Date</TableCell>
-              <TableCell>Appointment Time</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredAppointments.map((appointment) => (
-              <TableRow key={appointment._id}>
-                <TableCell>{appointment.appointmentId}</TableCell>
-                <TableCell>{appointment.patientName}</TableCell>
-                <TableCell>{appointment.careNeed}</TableCell>
-                <TableCell>{appointment.CareNavigator}</TableCell>
-                <TableCell>{appointment.Doctor}</TableCell>
-                <TableCell>
-                  {new Date(appointment.appointmentDate).toLocaleDateString()}
-                </TableCell>
+      <Box className="flex justify-between items-left mb-4">
+        <TextField
+          variant="outlined"
+          placeholder="Search by ID, doctor, or patient name"
+          value={searchTerm}
+          onChange={handleSearch}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            ),
+          }}
+          className="w-1/3"
+        />
+      </Box>
 
-                <TableCell>
-                  {new Date(appointment.appointmentTime).toLocaleTimeString(
-                    [],
-                    { hour: "2-digit", minute: "2-digit" }
-                  )}
-                </TableCell>
-                <TableCell>{appointment.status}</TableCell>
-                <TableCell>
-                  <IconButton
-                    color="primary"
-                    onClick={() => handleOpenDialog(appointment)}
-                  >
-                    <EditIcon />
-                  </IconButton>
-                  <IconButton
-                    color="secondary"
-                    onClick={() => handleDelete(appointment._id)}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                </TableCell>
+      {loading ? (
+        <Box className="flex justify-center items-center h-64">
+          <CircularProgress />
+        </Box>
+      ) : (
+        <TableContainer component={Paper} className="mt-4">
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Appointment ID</TableCell>
+                <TableCell>Patient Name</TableCell>
+                <TableCell>Care Need</TableCell>
+                <TableCell>Care Navigator</TableCell>
+                <TableCell>Doctor</TableCell>
+                <TableCell>Date</TableCell>
+                <TableCell>Time</TableCell>
+                <TableCell>Status</TableCell>
+                <TableCell>Actions</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {filteredAppointments.map((appointment) => (
+                <TableRow key={appointment._id}>
+                  <TableCell>{appointment.appointmentId}</TableCell>
+                  <TableCell>{appointment.patientName}</TableCell>
+                  <TableCell>{appointment.careNeed}</TableCell>
+                  <TableCell>{appointment.CareNavigator}</TableCell>
+                  <TableCell>{appointment.Doctor}</TableCell>
+                  <TableCell>
+                    {new Date(appointment.appointmentDate).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell>
+                    {new Date(appointment.appointmentTime).toLocaleTimeString(
+                      [],
+                      {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <span
+                      className={`px-2 py-1 rounded-full text-sm ${
+                        appointment.status === "Completed"
+                          ? "bg-green-100 text-green-800"
+                          : appointment.status === "Cancelled"
+                          ? "bg-red-100 text-red-800"
+                          : "bg-blue-100 text-blue-800"
+                      }`}
+                    >
+                      {appointment.status}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <IconButton
+                      color="primary"
+                      onClick={() => handleOpenDialog(appointment)}
+                    >
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton
+                      color="error"
+                      onClick={() => handleDelete(appointment._id)}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
+
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          {selectedAppointment ? "Edit Appointment" : "New Appointment"}
+        </DialogTitle>
+        <DialogContent>
+          <Box className="grid grid-cols-2 gap-4 mt-4">
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <DateTimePicker
+                label="Appointment Date"
+                value={formData.appointmentDate}
+                onChange={(newValue) =>
+                  handleDateChange(newValue, "appointmentDate")
+                }
+                renderInput={(params) => <TextField {...params} fullWidth />}
+              />
+              <DateTimePicker
+                label="Appointment Time"
+                value={formData.appointmentTime}
+                onChange={(newValue) =>
+                  handleDateChange(newValue, "appointmentTime")
+                }
+                renderInput={(params) => <TextField {...params} fullWidth />}
+              />
+            </LocalizationProvider>
+
+            <FormControl fullWidth>
+              <InputLabel>Status</InputLabel>
+              <Select
+                value={formData.status}
+                onChange={handleInputChange}
+                name="status"
+                label="Status"
+              >
+                <MenuItem value="Scheduled">Scheduled</MenuItem>
+                <MenuItem value="Completed">Completed</MenuItem>
+                <MenuItem value="Cancelled">Cancelled</MenuItem>
+                <MenuItem value="Rescheduled">Rescheduled</MenuItem>
+              </Select>
+            </FormControl>
+
+            <TextField
+              fullWidth
+              label="Doctor"
+              name="Doctor"
+              value={formData.Doctor}
+              onChange={handleInputChange}
+            />
+
+            <TextField
+              fullWidth
+              label="Notes"
+              name="notes"
+              value={formData.notes}
+              onChange={handleInputChange}
+              multiline
+              rows={4}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog}>Cancel</Button>
+          <Button
+            onClick={handleSubmit}
+            variant="contained"
+            color="primary"
+            disabled={loading}
+          >
+            {loading ? <CircularProgress size={24} /> : "Save"}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Snackbar
         open={!!success}

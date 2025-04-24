@@ -161,6 +161,9 @@ const CareNavigators = () => {
 
   return (
     <Box sx={{ p: 3, pt: 10 }}>
+      <Typography variant="h4" className="mb-4 text-center">
+        Care Navigators
+      </Typography>
       <Box
         sx={{
           display: "flex",
@@ -233,7 +236,7 @@ const CareNavigators = () => {
         </Table>
       </TableContainer>
 
-       {/*  this is for new care navigator creation */ }
+      {/*  this is for new care navigator creation */}
       <Dialog open={openDialog} onClose={handleCloseDialog}>
         <DialogTitle>
           {selectedNavigator ? "Edit Care Navigator" : "Add Care Navigator"}
