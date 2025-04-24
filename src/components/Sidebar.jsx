@@ -39,13 +39,14 @@ const navItems = [
   { text: "Care Plans", icon: <ReceiptOutlined />, path: "/careplans" },
   { text: "Appointments", icon: <EventOutlined />, path: "/appointment" },
   { text: "Messages", icon: <MessageOutlined />, path: "/messages" },
+  {
+    text: "Registered Patients",
+    icon: <ManageAccountsOutlined />,
+    path: "/patients",
+  },
   { text: "System Analytics", icon: null },
   { text: "Reports", icon: <BarChartOutlined />, path: "/reports" },
-  {
-    text: "User Management",
-    icon: <ManageAccountsOutlined />,
-    path: "/user-management",
-  },
+
   {
     text: "User Engagement",
     icon: <BarChartOutlined />,

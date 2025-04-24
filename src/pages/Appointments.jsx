@@ -189,7 +189,7 @@ const Appointments = () => {
   );
 
   return (
-    <Box sx={{  pt: 10 , paddingRight:10}}>
+    <Box sx={{ pt: 10, paddingRight: 10 }}>
       <Typography variant="h4" className="mb-4 text-center">
         Appointments
       </Typography>
