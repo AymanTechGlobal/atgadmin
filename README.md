@@ -1,70 +1,179 @@
-# Getting Started with Create React App
+# ATG Healthcare Care Plan Manager Admin Panel
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A modern, responsive admin panel for managing healthcare care plans, appointments, and care navigators. Built with React, Material-UI, and Tailwind CSS.
+
+## Features
+
+### Care Plans Management
+
+- View all care plans in a comprehensive table view
+- Search care plans by patient name, care navigator, or plan name
+- Preview care plan PDFs directly in the browser
+- Download care plan documents
+- Status tracking with color-coded indicators
+- Date-based sorting and filtering
+
+### Appointments Management
+
+- View and manage all appointments
+- Search appointments by ID, doctor, or patient name
+- Update appointment details (date, time, status, doctor)
+- Delete appointments with confirmation
+- Status tracking with visual indicators
+- Date and time management with proper formatting
+
+### Care Navigators
+
+- Manage care navigator profiles
+- Track care navigator assignments
+- View care navigator performance metrics
+
+### Authentication & Security
+
+- Secure login system
+- Protected routes
+- JWT-based authentication
+- Secure logout functionality
+- Password reset capability
+
+## Tech Stack
+
+### Frontend
+
+- React.js
+- Material-UI (MUI)
+- Tailwind CSS
+- Axios for API calls
+- React Router for navigation
+- Date-fns for date manipulation
+
+### Backend Integration
+
+- RESTful API integration
+- AWS S3 for document storage
+- Secure file handling
+- Real-time data updates
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v14 or higher)
+- npm or yarn
+- Modern web browser
+
+### Installation
+
+1. Clone the repository:
+
+```bash
+git clone [repository-url]
+cd frontend
+```
+
+2. Install dependencies:
+
+```bash
+npm install
+# or
+yarn install
+```
+
+3. Create a `.env` file in the root directory and add the following variables:
+
+```
+REACT_APP_API_URL=http://localhost:5000/api
+```
+
+4. Start the development server:
+
+```bash
+npm start
+# or
+yarn start
+```
+
+The application will be available at `http://localhost:3000`
+
+## Project Structure
+
+```
+frontend/
+├── public/
+│   ├── index.html
+│   └── assets/
+├── src/
+│   ├── components/
+│   │   ├── Header.jsx
+│   │   └── ProtectedRoute.jsx
+│   ├── layouts/
+│   │   └── Layout.jsx
+│   ├── pages/
+│   │   ├── Appointments.jsx
+│   │   ├── CarePlans.jsx
+│   │   ├── CareNavigators.jsx
+│   │   ├── Dashboard.jsx
+│   │   └── Login.jsx
+│   ├── theme/
+│   │   └── index.js
+│   ├── App.js
+│   └── index.js
+├── package.json
+├── tailwind.config.js
+└── README.md
+```
 
 ## Available Scripts
 
-In the project directory, you can run:
+- `npm start` - Runs the app in development mode
+- `npm build` - Builds the app for production
+- `npm test` - Runs the test suite
+- `npm eject` - Ejects from Create React App
 
-### `npm start`
+## Features in Detail
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### Care Plans
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- View all care plans in a table format
+- Search functionality across multiple fields
+- PDF preview in modal dialog
+- Direct download capability
+- Status indicators with color coding
+- Date formatting and sorting
 
-### `npm test`
+### Appointments
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- Comprehensive appointment management
+- Date and time picker integration
+- Status management
+- Search and filter capabilities
+- Confirmation dialogs for important actions
 
-### `npm run build`
+### User Interface
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- Responsive design
+- Material UI components
+- Tailwind CSS for custom styling
+- Loading states and error handling
+- Toast notifications for user feedback
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Contributing
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-### `npm run eject`
+## License
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+This project is licensed under the ISC License.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Acknowledgments
 
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- Material-UI for the component library
+- Tailwind CSS for the utility-first CSS framework
+- AWS for S3 storage integration
+- All contributors who have helped shape this project
