@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import { Logout, Menu } from "@mui/icons-material";
 import axios from "axios";
+import logo from "../assets/Ayman_Logo.png";
 
 const Header = ({ isSidebarOpen, setIsSidebarOpen }) => {
   const navigate = useNavigate();
@@ -72,6 +73,7 @@ const Header = ({ isSidebarOpen, setIsSidebarOpen }) => {
         }}
       >
         <Toolbar>
+          {/* Sidebar toggle button */}
           <IconButton
             color="inherit"
             aria-label="open drawer"
@@ -81,7 +83,27 @@ const Header = ({ isSidebarOpen, setIsSidebarOpen }) => {
           >
             <Menu />
           </IconButton>
+
+          {/* Logo on the left */}
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <img
+              src={logo}
+              alt="Ayman Logo"
+              style={{
+                height: "40px",
+                objectFit: "contain",
+                marginRight: "1rem",
+                marginLeft: ".5rem",
+                cursor: "pointer",
+              }}
+              onClick={() => navigate("/dashboard")}
+            />
+          </Box>
+
+          {/* Spacer */}
           <Box sx={{ flexGrow: 1 }} />
+
+          {/* Profile & Logout */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <Avatar
               alt="Profile"

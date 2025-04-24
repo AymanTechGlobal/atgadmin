@@ -13,6 +13,9 @@ import CareNavigators from "./pages/CareNavigators";
 import Appointments from "./pages/Appointments";
 import CarePlans from "./pages/CarePlans";
 import Patients from "./pages/Patients";
+import Messages from "./pages/Messages";
+import Invoices from "./pages/Invoices";
+import Payments from "pages/Payments";
 
 function App() {
   return (
@@ -33,7 +36,10 @@ function App() {
             <Route path="/care-navigators" element={<CareNavigators />} />
             <Route path="/appointment" element={<Appointments />} />
             <Route path="/careplans" element={<CarePlans />} />
-            <Route path="/patients" element={<Patients/>}/>
+            <Route path="/patients" element={<Patients />} />
+            <Route path="/messages" element={<Messages />} />
+            <Route path="/invoices" element={<Invoices />} />
+            <Route path="/payments" element={<Payments/>} />
           </Route>
         </Routes>
       </Router>
