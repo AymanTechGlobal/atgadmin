@@ -16,6 +16,7 @@ import Patients from "./pages/Patients";
 import Messages from "./pages/Messages";
 import Invoices from "./pages/Invoices";
 import Payments from "pages/Payments";
+import Profile from "./pages/Profile";
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
             <Route path="/messages" element={<Messages />} />
             <Route path="/invoices" element={<Invoices />} />
             <Route path="/payments" element={<Payments/>} />
+            <Route path="/profile" element={<Profile/>} />
           </Route>
         </Routes>
       </Router>

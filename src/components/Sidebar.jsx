@@ -84,8 +84,8 @@ const Sidebar = ({
         sx={{
           width: drawerWidth,
           "& .MuiDrawer-paper": {
-            color: theme.palette.secondary[200],
-            backgroundColor: theme.palette.background.alt,
+            color: "white",
+            background: "linear-gradient(180deg, #09D1C7 0%, #35AFEA 100%)",
             boxSizing: "border-box",
             borderWidth: isNonMobile ? 0 : 2,
             borderRadius: "0 2rem 2rem 0",
@@ -99,13 +99,16 @@ const Sidebar = ({
       >
         <Box width="100%">
           <Box m="1.5rem 2rem 2rem 3rem">
-            <FlexBetween color={theme.palette.secondary.main}>
+            <FlexBetween color="white">
               <Box display="flex" alignItems="center" gap="0.5rem">
-                <Typography variant="h4" fontWeight="bold">
+                <Typography variant="h4" fontWeight="bold" color="white">
                   ATG ADMIN
                 </Typography>
                 {isNonMobile && (
-                  <IconButton onClick={() => setIsSidebarOpen(false)}>
+                  <IconButton
+                    onClick={() => setIsSidebarOpen(false)}
+                    sx={{ color: "white" }}
+                  >
                     <ChevronLeft />
                   </IconButton>
                 )}
@@ -119,10 +122,12 @@ const Sidebar = ({
                 return (
                   <Typography
                     key={text}
-                    sx={{ m: "2.25rem 0 1rem 2rem" }}
-                    fontSize="12px"
-                    fontWeight="bold"
-                    color={theme.palette.secondary.main}
+                    sx={{
+                      m: "2.25rem 0 1rem 2rem",
+                      color: "rgba(255,255,255,0.7)",
+                      fontSize: "12px",
+                      fontWeight: "bold",
+                    }}
                   >
                     {text}
                   </Typography>
@@ -140,24 +145,34 @@ const Sidebar = ({
                     }}
                     sx={{
                       backgroundColor: isActive
-                        ? theme.palette.secondary[300]
+                        ? "rgba(255,255,255,0.2)"
                         : "transparent",
-                      color: isActive
-                        ? theme.palette.primary.main
-                        : theme.palette.secondary[100],
+                      color: "white",
+                      "&:hover": {
+                        backgroundColor: "rgba(255,255,255,0.1)",
+                      },
+                      borderRadius: "0 20px 20px 0",
+                      marginRight: "1rem",
+                      marginBottom: "0.5rem",
                     }}
                   >
                     <ListItemIcon
                       sx={{
                         ml: "2rem",
-                        color: isActive
-                          ? theme.palette.primary.main
-                          : theme.palette.secondary[200],
+                        color: isActive ? "white" : "rgba(255,255,255,0.7)",
+                        minWidth: "40px",
                       }}
                     >
                       {icon}
                     </ListItemIcon>
-                    <ListItemText primary={text} />
+                    <ListItemText
+                      primary={text}
+                      sx={{
+                        "& .MuiTypography-root": {
+                          fontWeight: isActive ? "bold" : "normal",
+                        },
+                      }}
+                    />
                   </ListItemButton>
                 </ListItem>
               );

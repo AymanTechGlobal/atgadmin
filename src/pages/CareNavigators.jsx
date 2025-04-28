@@ -19,6 +19,7 @@ import {
   InputAdornment,
   Alert,
   Snackbar,
+  CircularProgress,
 } from "@mui/material";
 import {
   Search as SearchIcon,
@@ -28,7 +29,7 @@ import {
 } from "@mui/icons-material";
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api/management/care-navigators";
+const API_URL = "http://localhost:5000/api/care-navigators";
 
 const CareNavigators = () => {
   const [navigators, setNavigators] = useState([]);
@@ -50,14 +51,22 @@ const CareNavigators = () => {
   }, []);
 
   const fetchNavigators = async () => {
+    setLoading(true);
     try {
-      const response = await axios.get(API_URL);
+      const token = localStorage.getItem("token");
+      const response = await axios.get(API_URL, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (response.data.success) {
         setNavigators(response.data.data);
       }
     } catch (error) {
       setError("Error fetching care navigators");
       console.error("Error fetching care navigators:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -104,10 +113,16 @@ const CareNavigators = () => {
     setLoading(true);
     setError(null);
     try {
+      const token = localStorage.getItem("token");
       if (selectedNavigator) {
         const response = await axios.put(
           `${API_URL}/${selectedNavigator._id}`,
-          formData
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
         if (response.data.success) {
           setSuccess("Care navigator updated successfully");
@@ -115,7 +130,11 @@ const CareNavigators = () => {
           handleCloseDialog();
         }
       } else {
-        const response = await axios.post(API_URL, formData);
+        const response = await axios.post(API_URL, formData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         if (response.data.success) {
           setSuccess("Care navigator added successfully");
           fetchNavigators();
@@ -138,7 +157,12 @@ const CareNavigators = () => {
       window.confirm("Are you sure you want to delete this care navigator?")
     ) {
       try {
-        const response = await axios.delete(`${API_URL}/${id}`);
+        const token = localStorage.getItem("token");
+        const response = await axios.delete(`${API_URL}/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         if (response.data.success) {
           setSuccess("Care navigator deleted successfully");
           fetchNavigators();
@@ -159,9 +183,17 @@ const CareNavigators = () => {
     navigator.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  if (loading && navigators.length === 0) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
     <Box sx={{ p: 3, pt: 10 }}>
-      <Typography variant="h4" className="mb-4 text-center">
+      <Typography variant="h4" sx={{ mb: 4, color: "#09D1C7" }}>
         Care Navigators
       </Typography>
       <Box
@@ -189,15 +221,21 @@ const CareNavigators = () => {
           variant="contained"
           startIcon={<AddIcon />}
           onClick={() => handleOpenDialog()}
+          sx={{
+            background: "linear-gradient(135deg, #09D1C7 0%, #35AFEA 100%)",
+            "&:hover": {
+              background: "linear-gradient(135deg, #08BDB4 0%, #2E9FD9 100%)",
+            },
+          }}
         >
           Add Care Navigator
         </Button>
       </Box>
 
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} sx={{ borderRadius: "12px" }}>
         <Table>
           <TableHead>
-            <TableRow>
+            <TableRow sx={{ backgroundColor: "rgba(9,209,199,0.1)" }}>
               <TableCell>Name</TableCell>
               <TableCell>Email</TableCell>
               <TableCell>Phone</TableCell>
@@ -219,13 +257,13 @@ const CareNavigators = () => {
                 <TableCell>
                   <IconButton
                     onClick={() => handleOpenDialog(navigator)}
-                    color="primary"
+                    sx={{ color: "#09D1C7" }}
                   >
                     <EditIcon />
                   </IconButton>
                   <IconButton
                     onClick={() => handleDelete(navigator._id)}
-                    color="error"
+                    sx={{ color: "#ff4444" }}
                   >
                     <DeleteIcon />
                   </IconButton>
@@ -236,9 +274,18 @@ const CareNavigators = () => {
         </Table>
       </TableContainer>
 
-      {/*  this is for new care navigator creation */}
-      <Dialog open={openDialog} onClose={handleCloseDialog}>
-        <DialogTitle>
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        PaperProps={{
+          sx: {
+            borderRadius: "12px",
+            background:
+              "linear-gradient(135deg, rgba(9,209,199,0.1) 0%, rgba(53,175,234,0.1) 100%)",
+          },
+        }}
+      >
+        <DialogTitle sx={{ color: "#09D1C7" }}>
           {selectedNavigator ? "Edit Care Navigator" : "Add Care Navigator"}
         </DialogTitle>
         <DialogContent>
@@ -292,8 +339,28 @@ const CareNavigators = () => {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button onClick={handleSubmit} variant="contained" disabled={loading}>
+          <Button
+            onClick={handleCloseDialog}
+            sx={{
+              color: "#666",
+              "&:hover": {
+                backgroundColor: "rgba(9,209,199,0.1)",
+              },
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            variant="contained"
+            disabled={loading}
+            sx={{
+              background: "linear-gradient(135deg, #09D1C7 0%, #35AFEA 100%)",
+              "&:hover": {
+                background: "linear-gradient(135deg, #08BDB4 0%, #2E9FD9 100%)",
+              },
+            }}
+          >
             {loading ? "Saving..." : selectedNavigator ? "Update" : "Add"}
           </Button>
         </DialogActions>
