@@ -19,7 +19,6 @@ import {
   ReceiptOutlined,
   BarChartOutlined,
   ManageAccountsOutlined,
-  PaymentOutlined,
   PeopleOutlined,
   EventOutlined,
   MessageOutlined,
