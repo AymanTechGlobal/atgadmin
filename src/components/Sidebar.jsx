@@ -52,10 +52,8 @@ const navItems = [
     icon: <BarChartOutlined />,
     path: "/user-engagement",
   },
-  { text: "System Settings", icon: <SettingsOutlined />, path: "/settings" },
-  { text: "Transactions", icon: null },
-  { text: "Invoices", icon: <ReceiptOutlined />, path: "/invoices" },
-  { text: "Payments", icon: <PaymentOutlined />, path: "/payments" },
+  { text: "System Settings", icon: <SettingsOutlined />, path: "/profile" },
+  
 ];
 
 const Sidebar = ({

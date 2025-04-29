@@ -14,8 +14,7 @@ import Appointments from "./pages/Appointments";
 import CarePlans from "./pages/CarePlans";
 import Patients from "./pages/Patients";
 import Messages from "./pages/Messages";
-import Invoices from "./pages/Invoices";
-import Payments from "pages/Payments";
+
 import Profile from "./pages/Profile";
 
 function App() {
@@ -39,9 +38,8 @@ function App() {
             <Route path="/careplans" element={<CarePlans />} />
             <Route path="/patients" element={<Patients />} />
             <Route path="/messages" element={<Messages />} />
-            <Route path="/invoices" element={<Invoices />} />
-            <Route path="/payments" element={<Payments/>} />
-            <Route path="/profile" element={<Profile/>} />
+
+            <Route path="/profile" element={<Profile />} />
           </Route>
         </Routes>
       </Router>
