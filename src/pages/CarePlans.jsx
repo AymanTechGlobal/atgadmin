@@ -128,7 +128,7 @@ const CarePlans = () => {
 
   return (
     <Box sx={{ p: 3, pt: 10 }}>
-      <Typography variant="h4" className="mb-4 text-center">
+      <Typography variant="h4" sx={{ mb: 4, color: "#09D1C7", textAlign: "center" }}>
         Care Plans
       </Typography>
 

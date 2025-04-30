@@ -11,8 +11,12 @@ const Dashboard = () => {
         p: 3,
       }}
     >
-      <Typography variant="h4" component="h1">
-        Dashboard
+      <Typography
+        variant="h4"
+        component="h1"
+        sx={{ mt: 4, color: "#09D1C7", textAlign: "center" }}
+      >
+        Admin View
       </Typography>
       <Box
         sx={{

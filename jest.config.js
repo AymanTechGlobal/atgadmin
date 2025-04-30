@@ -4,7 +4,8 @@ module.exports = {
   moduleNameMapper: {
     "\\.(css|less|scss|sass)$": "identity-obj-proxy",
     "\\.(gif|ttf|eot|svg|png)$": "<rootDir>/__mocks__/fileMock.js",
-    "@lottiefiles/dotlottie-react": "<rootDir>/__mocks__/@lottiefiles/dotlottie-react.js"
+    "@lottiefiles/dotlottie-react":
+      "<rootDir>/__mocks__/@lottiefiles/dotlottie-react.js",
   },
   transform: {
     "^.+\\.(js|jsx|ts|tsx)$": [
@@ -32,6 +33,7 @@ module.exports = {
     },
   },
   verbose: true,
+  watchAll: false,
   transformIgnorePatterns: [
     "/node_modules/(?!(@babel/runtime|@emotion|@mui|@lottiefiles)/)",
   ],

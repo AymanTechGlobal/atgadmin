@@ -240,12 +240,28 @@ const Profile = () => {
         PaperProps={{
           sx: {
             borderRadius: "12px",
-            background:
-              "linear-gradient(135deg, rgba(9,209,199,0.1) 0%, rgba(53,175,234,0.1) 100%)",
+            minWidth: "400px",
+            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
+            background: "#ffffff",
+            "& .MuiDialogTitle-root": {
+              background: "linear-gradient(135deg, #09D1C7 0%, #35AFEA 100%)",
+              color: "#ffffff",
+              padding: "16px 24px",
+              borderRadius: "12px 12px 0 0",
+            },
+            "& .MuiDialogContent-root": {
+              padding: "24px",
+              background: "#ffffff",
+            },
+            "& .MuiDialogActions-root": {
+              padding: "16px 24px",
+              background: "#f8f9fa",
+              borderRadius: "0 0 12px 12px",
+            },
           },
         }}
       >
-        <DialogTitle sx={{ color: "#09D1C7" }}>
+        <DialogTitle>
           {selectedAdmin ? "Edit Admin" : "Add New Admin"}
         </DialogTitle>
         <DialogContent>

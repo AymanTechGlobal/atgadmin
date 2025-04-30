@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
-import Login from "../src/pages/Login";
+import Login from "../Login";
 import axios from "axios";
 
 // Mock axios
