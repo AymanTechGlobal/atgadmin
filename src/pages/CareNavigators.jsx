@@ -37,11 +37,14 @@ const CareNavigators = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedNavigator, setSelectedNavigator] = useState(null);
+  const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
     status: "Active",
+    username: "",
+    calendlyName: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -75,6 +78,16 @@ const CareNavigators = () => {
     setSearchTerm(event.target.value);
   };
 
+  const handleUpdateDialog = () => {
+    setOpenUpdateDialog(true);
+  };
+
+  const handleCloseUpdateDialog = () => {
+    setOpenUpdateDialog(false);
+  };  
+
+  
+
   const handleOpenDialog = (navigator = null) => {
     if (navigator) {
       setSelectedNavigator(navigator);
@@ -83,6 +96,8 @@ const CareNavigators = () => {
         email: navigator.email,
         phone: navigator.phone,
         status: navigator.status,
+        username: navigator.username.replace("cn_", ""),
+        
       });
     } else {
       setSelectedNavigator(null);
@@ -91,6 +106,8 @@ const CareNavigators = () => {
         email: "",
         phone: "",
         status: "Active",
+        username: "",
+        calendlyName: "",
       });
     }
     setOpenDialog(true);
@@ -182,6 +199,26 @@ const CareNavigators = () => {
     }
   };
 
+  //resend temp passwords check with backend
+  const handleResendTempPasswords = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.post(`${API_URL}/resend-temp-passwords`, {
+        username: formData.username,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (response.data.success) {
+        setSuccess("Temp passwords resent successfully");
+        fetchNavigators();
+      }
+    } catch (error) {
+      setError("Error resending temp passwords");
+      console.error("Error resending temp passwords:", error);
+    }
+  };
+
   const handleCloseSnackbar = () => {
     setSuccess(null);
     setError(null);
@@ -247,6 +284,21 @@ const CareNavigators = () => {
         >
           Add Care Navigator
         </Button>
+
+        {/* ReSend Temp Passwords Button */}
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => handleUpdateDialog()}
+          sx={{
+            background: "linear-gradient(135deg, #09D1C7 0%, #35AFEA 100%)",
+            "&:hover": {
+              background: "linear-gradient(135deg, #08BDB4 0%, #2E9FD9 100%)",
+            },
+          }}
+        >
+          ReSend Temp Passwords
+        </Button>
       </Box>
 
       {loading && navigators.length === 0 ? (
@@ -267,6 +319,8 @@ const CareNavigators = () => {
                 <TableCell>Date Joined</TableCell>
                 <TableCell>Status</TableCell>
                 <TableCell>Actions</TableCell>
+                <TableCell>Username</TableCell>
+                <TableCell>Calendly Name</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -282,6 +336,8 @@ const CareNavigators = () => {
                     {new Date(navigator.dateJoined).toLocaleDateString()}
                   </TableCell>
                   <TableCell>{navigator.status}</TableCell>
+                  <TableCell>{navigator.username}</TableCell>
+                  <TableCell>{navigator.calendlyName}</TableCell>
                   <TableCell>
                     <IconButton
                       onClick={() => handleOpenDialog(navigator)}
@@ -397,6 +453,32 @@ const CareNavigators = () => {
               <option value="Inactive">Inactive</option>
               <option value="On Leave">On Leave</option>
             </TextField>
+
+            <TextField
+              label="Username"
+              name="username"
+              value={formData.username}
+              onChange={handleInputChange}
+              fullWidth
+              required
+              inputProps={{
+                "aria-label": "Username",
+                "data-testid": "username-input",
+              }}
+            />
+
+            <TextField
+              label="Calendly Name"
+              name="calendlyName"
+              value={formData.calendlyName}
+              onChange={handleInputChange}
+              fullWidth
+              required
+              inputProps={{
+                "aria-label": "Calendly Name",
+                "data-testid": "calendlyName-input",
+              }}
+            />
           </Box>
         </DialogContent>
         <DialogActions>
@@ -426,6 +508,39 @@ const CareNavigators = () => {
           >
             {loading ? "Saving..." : selectedNavigator ? "Update" : "Add"}
           </Button>
+        </DialogActions>
+      </Dialog>
+       
+      {/* ReSend Temp Passwords Dialog */}
+
+      <Dialog
+        open={openUpdateDialog}
+        onClose={handleCloseUpdateDialog}
+        aria-labelledby="update-dialog-title"
+        PaperProps={{
+          sx: { borderRadius: "12px" },
+        }}
+      >
+        <DialogTitle>ReSend Temp Passwords</DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 2 }}>
+            <TextField
+              label="Username"
+              name="username"
+              value={formData.username}
+              onChange={handleInputChange}
+              fullWidth
+              required
+              inputProps={{
+                "aria-label": "Username",
+                "data-testid": "username-input",
+              }}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseUpdateDialog}>Cancel</Button>
+          <Button onClick={handleResendTempPasswords}>ReSend</Button>
         </DialogActions>
       </Dialog>
 

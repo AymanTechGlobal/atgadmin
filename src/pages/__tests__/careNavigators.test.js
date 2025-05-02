@@ -1,5 +1,6 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import axios from "axios";
 import CareNavigators from "../CareNavigators";
 
@@ -46,41 +47,50 @@ describe("CareNavigators Component", () => {
   it("renders the care navigators page", async () => {
     render(<CareNavigators />);
 
-    // Check if the page title is rendered
+    // First check loading state
+    expect(screen.getByTestId("loading-spinner")).toBeInTheDocument();
+
+    // Wait for loading to complete and check page elements
+    await waitFor(() => {
+      expect(screen.queryByTestId("loading-spinner")).not.toBeInTheDocument();
+    });
+
+    // Now check the page content
     expect(screen.getByTestId("page-title")).toHaveTextContent(
       "Care Navigators"
     );
-
-    // Check if the search input is rendered
     expect(screen.getByTestId("search-input")).toBeInTheDocument();
-
-    // Check if the add button is rendered
     expect(screen.getByTestId("add-button")).toHaveTextContent(
       "Add Care Navigator"
     );
 
-    // Wait for the table to load and check if navigators are displayed
+    // Check table content separately
     await waitFor(() => {
       expect(screen.getByRole("table")).toBeInTheDocument();
-      expect(screen.getByText("John Doe")).toBeInTheDocument();
-      expect(screen.getByText("Jane Smith")).toBeInTheDocument();
     });
+
+    expect(screen.getByText("John Doe")).toBeInTheDocument();
+    expect(screen.getByText("Jane Smith")).toBeInTheDocument();
   });
 
   it("filters navigators based on search input", async () => {
     render(<CareNavigators />);
 
-    // Wait for the table to load
+    // Wait for loading to complete
     await waitFor(() => {
-      expect(screen.getByRole("table")).toBeInTheDocument();
+      expect(screen.queryByTestId("loading-spinner")).not.toBeInTheDocument();
     });
 
-    // Type in the search input
+    // Get the search input and update its value using userEvent
     const searchInput = screen.getByTestId("search-input");
-    fireEvent.change(searchInput, { target: { value: "John" } });
+    const user = userEvent.setup();
+   await user.type(searchInput, "John");
 
-    // Check if only John Doe is displayed
+    // Wait for the filter to be applied
+  await waitFor(() => {
     expect(screen.getByText("John Doe")).toBeInTheDocument();
+  });
+
     expect(screen.queryByText("Jane Smith")).not.toBeInTheDocument();
   });
 
@@ -88,9 +98,9 @@ describe("CareNavigators Component", () => {
     it("opens add dialog when add button is clicked", async () => {
       render(<CareNavigators />);
 
-      // Wait for the table to load
+      // Wait for loading to complete
       await waitFor(() => {
-        expect(screen.getByRole("table")).toBeInTheDocument();
+        expect(screen.queryByTestId("loading-spinner")).not.toBeInTheDocument();
       });
 
       // Click the add button
@@ -110,28 +120,25 @@ describe("CareNavigators Component", () => {
 
       render(<CareNavigators />);
 
-      // Wait for the table to load
+      // Wait for loading to complete
       await waitFor(() => {
-        expect(screen.getByRole("table")).toBeInTheDocument();
+        expect(screen.queryByTestId("loading-spinner")).not.toBeInTheDocument();
       });
 
       // Click the add button
       const addButton = screen.getByTestId("add-button");
       fireEvent.click(addButton);
 
-      // Fill in the form
-      fireEvent.change(screen.getByTestId("name-input"), {
-        target: { name: "name", value: "New Navigator" },
-      });
-      fireEvent.change(screen.getByTestId("email-input"), {
-        target: { name: "email", value: "new@example.com" },
-      });
-      fireEvent.change(screen.getByTestId("phone-input"), {
-        target: { name: "phone", value: "1234567890" },
-      });
-      fireEvent.change(screen.getByTestId("status-select"), {
-        target: { name: "status", value: "Active" },
-      });
+      // Fill in the form using userEvent
+      const nameInput = screen.getByRole("textbox", { name: /name/i });
+      const emailInput = screen.getByRole("textbox", { name: /email/i });
+      const phoneInput = screen.getByRole("textbox", { name: /phone/i });
+      const statusSelect = screen.getByRole("combobox", { name: /status/i });
+
+      await userEvent.type(nameInput, "New Navigator");
+      await userEvent.type(emailInput, "new@example.com");
+      await userEvent.type(phoneInput, "1234567890");
+      await userEvent.selectOptions(statusSelect, "Active");
 
       // Submit the form
       const submitButton = screen.getByTestId("submit-button");
@@ -162,9 +169,9 @@ describe("CareNavigators Component", () => {
     it("opens edit dialog with navigator data", async () => {
       render(<CareNavigators />);
 
-      // Wait for the table to load
+      // Wait for loading to complete
       await waitFor(() => {
-        expect(screen.getByRole("table")).toBeInTheDocument();
+        expect(screen.queryByTestId("loading-spinner")).not.toBeInTheDocument();
       });
 
       // Click the edit button for the first navigator
@@ -176,8 +183,12 @@ describe("CareNavigators Component", () => {
       expect(screen.getByTestId("dialog-title")).toHaveTextContent(
         "Edit Care Navigator"
       );
-      expect(screen.getByTestId("name-input")).toHaveValue("John Doe");
-      expect(screen.getByTestId("email-input")).toHaveValue("john@example.com");
+      expect(screen.getByRole("textbox", { name: /name/i })).toHaveValue(
+        "John Doe"
+      );
+      expect(screen.getByRole("textbox", { name: /email/i })).toHaveValue(
+        "john@example.com"
+      );
     });
 
     it("updates a care navigator", async () => {
@@ -186,19 +197,19 @@ describe("CareNavigators Component", () => {
 
       render(<CareNavigators />);
 
-      // Wait for the table to load
+      // Wait for loading to complete
       await waitFor(() => {
-        expect(screen.getByRole("table")).toBeInTheDocument();
+        expect(screen.queryByTestId("loading-spinner")).not.toBeInTheDocument();
       });
 
       // Click the edit button
       const editButton = screen.getByTestId("edit-button-1");
       fireEvent.click(editButton);
 
-      // Update the form
-      fireEvent.change(screen.getByTestId("name-input"), {
-        target: { name: "name", value: "Updated Name" },
-      });
+      // Update the form using userEvent
+      const nameInput = screen.getByRole("textbox", { name: /name/i });
+      await userEvent.clear(nameInput);
+      await userEvent.type(nameInput, "Updated Name");
 
       // Submit the form
       const submitButton = screen.getByTestId("submit-button");
@@ -226,9 +237,9 @@ describe("CareNavigators Component", () => {
     it("opens delete dialog when delete button is clicked", async () => {
       render(<CareNavigators />);
 
-      // Wait for the table to load
+      // Wait for loading to complete
       await waitFor(() => {
-        expect(screen.getByRole("table")).toBeInTheDocument();
+        expect(screen.queryByTestId("loading-spinner")).not.toBeInTheDocument();
       });
 
       // Click the delete button
@@ -245,9 +256,9 @@ describe("CareNavigators Component", () => {
     it("closes delete dialog when cancel button is clicked", async () => {
       render(<CareNavigators />);
 
-      // Wait for the table to load
+      // Wait for loading to complete
       await waitFor(() => {
-        expect(screen.getByRole("table")).toBeInTheDocument();
+        expect(screen.queryByTestId("loading-spinner")).not.toBeInTheDocument();
       });
 
       // Click the delete button
@@ -261,8 +272,10 @@ describe("CareNavigators Component", () => {
       const cancelButton = screen.getByTestId("cancel-delete-button");
       fireEvent.click(cancelButton);
 
-      // Check if delete dialog is closed
-      expect(screen.queryByTestId("delete-dialog")).not.toBeInTheDocument();
+      // Wait for dialog to close
+      await waitFor(() => {
+        expect(screen.queryByTestId("delete-dialog")).not.toBeInTheDocument();
+      });
     });
 
     it("deletes a care navigator when confirmed", async () => {
@@ -271,9 +284,9 @@ describe("CareNavigators Component", () => {
 
       render(<CareNavigators />);
 
-      // Wait for the table to load
+      // Wait for loading to complete
       await waitFor(() => {
-        expect(screen.getByRole("table")).toBeInTheDocument();
+        expect(screen.queryByTestId("loading-spinner")).not.toBeInTheDocument();
       });
 
       // Click the delete button
@@ -307,9 +320,9 @@ describe("CareNavigators Component", () => {
 
       render(<CareNavigators />);
 
-      // Wait for the table to load
+      // Wait for loading to complete
       await waitFor(() => {
-        expect(screen.getByRole("table")).toBeInTheDocument();
+        expect(screen.queryByTestId("loading-spinner")).not.toBeInTheDocument();
       });
 
       // Click the delete button
