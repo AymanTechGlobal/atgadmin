@@ -38,6 +38,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import axios from "axios";
 import { spacing } from "@mui/system";
+import { format } from "date-fns";
 const API_URL = "http://localhost:5000/api/appointments";
 
 //  end points
@@ -60,9 +61,11 @@ const Appointments = () => {
     Doctor: "",
     notes: "",
   });
+  const [lastSync, setLastSync] = useState(null);
 
   useEffect(() => {
     fetchAppointments();
+    fetchSyncStatus();
   }, []);
 
   const fetchAppointments = async () => {
@@ -80,6 +83,17 @@ const Appointments = () => {
     }
   };
 
+  const fetchSyncStatus = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/sync-status`);
+      if (response.data.success) {
+        setLastSync(response.data.data.lastSync);
+      }
+    } catch (error) {
+      console.error("Error fetching sync status:", error);
+    }
+  };
+
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
   };
@@ -91,7 +105,7 @@ const Appointments = () => {
         appointmentDate: new Date(appointment.appointmentDate),
         appointmentTime: new Date(appointment.appointmentTime),
         status: appointment.status,
-        Doctor: appointment.Doctor,
+
         notes: appointment.notes || "",
       });
     } else {
@@ -100,7 +114,7 @@ const Appointments = () => {
         appointmentDate: new Date(),
         appointmentTime: new Date(),
         status: "Scheduled",
-        Doctor: "",
+
         notes: "",
       });
     }
@@ -133,14 +147,13 @@ const Appointments = () => {
     setError(null);
     try {
       const dataToSend = {
-        ...formData,
-        appointmentDate: formData.appointmentDate.toISOString(),
-        appointmentTime: formData.appointmentTime.toISOString(),
+        status: formData.status,
+        notes: formData.notes,
       };
 
       if (selectedAppointment) {
         const response = await axios.put(
-          `${API_URL}/${selectedAppointment._id}`,
+          `${API_URL}/${selectedAppointment.appointmentId}`,
           dataToSend
         );
         if (response.data.success) {
@@ -197,6 +210,15 @@ const Appointments = () => {
         Appointments
       </Typography>
 
+      {lastSync && (
+        <Typography
+          variant="body2"
+          sx={{ mb: 2, textAlign: "right", color: "gray" }}
+        >
+          Last synced: {format(new Date(lastSync), "PPpp")}
+        </Typography>
+      )}
+
       <Box className="flex justify-between items-left mb-4">
         <TextField
           variant="outlined"
@@ -225,9 +247,9 @@ const Appointments = () => {
               <TableRow>
                 <TableCell>Appointment ID</TableCell>
                 <TableCell>Patient Name</TableCell>
-                <TableCell>Care Need</TableCell>
+
                 <TableCell>Care Navigator</TableCell>
-                <TableCell>Doctor</TableCell>
+
                 <TableCell>Date</TableCell>
                 <TableCell>Time</TableCell>
                 <TableCell>Status</TableCell>
@@ -239,9 +261,9 @@ const Appointments = () => {
                 <TableRow key={appointment._id}>
                   <TableCell>{appointment.appointmentId}</TableCell>
                   <TableCell>{appointment.patientName}</TableCell>
-                  <TableCell>{appointment.careNeed}</TableCell>
+
                   <TableCell>{appointment.CareNavigator}</TableCell>
-                  <TableCell>{appointment.Doctor}</TableCell>
+
                   <TableCell>
                     {new Date(appointment.appointmentDate).toLocaleDateString()}
                   </TableCell>
@@ -326,10 +348,9 @@ const Appointments = () => {
                 name="status"
                 label="Status"
               >
-                <MenuItem value="Scheduled">Scheduled</MenuItem>
+                <MenuItem value="Active">Active</MenuItem>
                 <MenuItem value="Completed">Completed</MenuItem>
                 <MenuItem value="Cancelled">Cancelled</MenuItem>
-                <MenuItem value="Rescheduled">Rescheduled</MenuItem>
               </Select>
             </FormControl>
 
