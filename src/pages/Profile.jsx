@@ -38,9 +38,10 @@ const Profile = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedAdmin, setSelectedAdmin] = useState(null);
   const [formData, setFormData] = useState({
+    name: "",
     email: "",
     password: "",
-    contact: "",
+    phone: "",
   });
 
   useEffect(() => {
@@ -71,16 +72,18 @@ const Profile = () => {
     if (admin) {
       setSelectedAdmin(admin);
       setFormData({
+        name: admin.name,
         email: admin.email,
-        contact: admin.contact,
+        phone: admin.phone,
         password: "",
       });
     } else {
       setSelectedAdmin(null);
       setFormData({
+        name: "",
         email: "",
         password: "",
-        contact: "",
+        phone: "",
       });
     }
     setOpenDialog(true);
@@ -204,16 +207,18 @@ const Profile = () => {
         <Table>
           <TableHead>
             <TableRow sx={{ backgroundColor: "rgba(9,209,199,0.1)" }}>
+              <TableCell>Name</TableCell>
               <TableCell>Email</TableCell>
-              <TableCell>Contact</TableCell>
+              <TableCell>Phone</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {admins.map((admin) => (
               <TableRow key={admin._id}>
+                <TableCell>{admin.name}</TableCell>
                 <TableCell>{admin.email}</TableCell>
-                <TableCell>{admin.contact}</TableCell>
+                <TableCell>{admin.phone}</TableCell>
                 <TableCell>
                   <IconButton
                     onClick={() => handleOpenDialog(admin)}
@@ -272,6 +277,14 @@ const Profile = () => {
               </Alert>
             )}
             <TextField
+              label="Name"
+              name="name"
+              value={formData.name}
+              onChange={handleInputChange}
+              fullWidth
+              required
+            />
+            <TextField
               label="Email"
               name="email"
               type="email"
@@ -290,10 +303,9 @@ const Profile = () => {
               required={!selectedAdmin}
             />
             <TextField
-              label="Contact"
-              name="contact"
-              type="number"
-              value={formData.contact}
+              label="Phone"
+              name="phone"
+              value={formData.phone}
               onChange={handleInputChange}
               fullWidth
               required

@@ -160,7 +160,7 @@ const ResetPassword = () => {
               Remember your password?{" "}
               <Button
                 color="primary"
-                onClick={() => navigate("/login")}
+                onClick={() => navigate("/")}
                 className="text-indigo-600 hover:text-indigo-500"
               >
                 Back to Login
