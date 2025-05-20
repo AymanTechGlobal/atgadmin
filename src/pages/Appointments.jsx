@@ -57,8 +57,7 @@ const Appointments = () => {
   const [formData, setFormData] = useState({
     appointmentDate: new Date(),
     appointmentTime: new Date(),
-    status: "Scheduled",
-    Doctor: "",
+    status: "active",
     notes: "",
   });
   const [lastSync, setLastSync] = useState(null);
@@ -102,10 +101,13 @@ const Appointments = () => {
     if (appointment) {
       setSelectedAppointment(appointment);
       setFormData({
-        appointmentDate: new Date(appointment.appointmentDate),
-        appointmentTime: new Date(appointment.appointmentTime),
-        status: appointment.status,
-
+        appointmentDate: appointment.appointmentDate
+          ? new Date(appointment.appointmentDate)
+          : new Date(),
+        appointmentTime: appointment.appointmentTime
+          ? new Date(appointment.appointmentTime)
+          : new Date(),
+        status: appointment.status || "active",
         notes: appointment.notes || "",
       });
     } else {
@@ -113,8 +115,7 @@ const Appointments = () => {
       setFormData({
         appointmentDate: new Date(),
         appointmentTime: new Date(),
-        status: "Scheduled",
-
+        status: "active",
         notes: "",
       });
     }
@@ -195,10 +196,15 @@ const Appointments = () => {
   const filteredAppointments = appointments.filter(
     (appointment) =>
       appointment.appointmentId
+        ?.toString()
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      appointment.patientName
         ?.toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
-      appointment.Doctor?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      appointment.patientName?.toLowerCase().includes(searchTerm.toLowerCase())
+      appointment.careNavigator
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -222,7 +228,7 @@ const Appointments = () => {
       <Box className="flex justify-between items-left mb-4">
         <TextField
           variant="outlined"
-          placeholder="Search by ID, doctor, or patient name"
+          placeholder="Search by ID, patient name, or care navigator"
           value={searchTerm}
           onChange={handleSearch}
           InputProps={{
@@ -247,9 +253,7 @@ const Appointments = () => {
               <TableRow>
                 <TableCell>Appointment ID</TableCell>
                 <TableCell>Patient Name</TableCell>
-
                 <TableCell>Care Navigator</TableCell>
-
                 <TableCell>Date</TableCell>
                 <TableCell>Time</TableCell>
                 <TableCell>Status</TableCell>
@@ -258,30 +262,33 @@ const Appointments = () => {
             </TableHead>
             <TableBody>
               {filteredAppointments.map((appointment) => (
-                <TableRow key={appointment._id}>
+                <TableRow key={appointment.appointmentId}>
                   <TableCell>{appointment.appointmentId}</TableCell>
                   <TableCell>{appointment.patientName}</TableCell>
-
-                  <TableCell>{appointment.CareNavigator}</TableCell>
-
+                  <TableCell>{appointment.careNavigator}</TableCell>
                   <TableCell>
-                    {new Date(appointment.appointmentDate).toLocaleDateString()}
+                    {appointment.appointmentDate
+                      ? new Date(
+                          appointment.appointmentDate
+                        ).toLocaleDateString()
+                      : ""}
                   </TableCell>
                   <TableCell>
-                    {new Date(appointment.appointmentTime).toLocaleTimeString(
-                      [],
-                      {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      }
-                    )}
+                    {appointment.appointmentTime
+                      ? new Date(
+                          appointment.appointmentTime
+                        ).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      : ""}
                   </TableCell>
                   <TableCell>
                     <span
                       className={`px-2 py-1 rounded-full text-sm ${
-                        appointment.status === "Completed"
+                        appointment.status === "completed"
                           ? "bg-green-100 text-green-800"
-                          : appointment.status === "Cancelled"
+                          : appointment.status === "cancelled"
                           ? "bg-red-100 text-red-800"
                           : "bg-blue-100 text-blue-800"
                       }`}
@@ -298,7 +305,7 @@ const Appointments = () => {
                     </IconButton>
                     <IconButton
                       color="error"
-                      onClick={() => handleDelete(appointment._id)}
+                      onClick={() => handleDelete(appointment.appointmentId)}
                     >
                       <DeleteIcon />
                     </IconButton>
@@ -339,7 +346,6 @@ const Appointments = () => {
                 renderInput={(params) => <TextField {...params} fullWidth />}
               />
             </LocalizationProvider>
-
             <FormControl fullWidth>
               <InputLabel>Status</InputLabel>
               <Select
@@ -348,20 +354,11 @@ const Appointments = () => {
                 name="status"
                 label="Status"
               >
-                <MenuItem value="Active">Active</MenuItem>
-                <MenuItem value="Completed">Completed</MenuItem>
-                <MenuItem value="Cancelled">Cancelled</MenuItem>
+                <MenuItem value="active">Active</MenuItem>
+                <MenuItem value="completed">Completed</MenuItem>
+                <MenuItem value="cancelled">Cancelled</MenuItem>
               </Select>
             </FormControl>
-
-            <TextField
-              fullWidth
-              label="Doctor"
-              name="Doctor"
-              value={formData.Doctor}
-              onChange={handleInputChange}
-            />
-
             <TextField
               fullWidth
               label="Notes"
