@@ -1,156 +1,186 @@
-import React, { useState, useEffect } from "react";
-import { Box, Typography, Paper, CircularProgress } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import {
+  Box,
+  Typography,
+  Paper,
+  CircularProgress,
+  Grid,
+  Chip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from "@mui/material";
+import { PieChart } from "@mui/x-charts/PieChart";
 import axios from "axios";
 
 const Dashboard = () => {
-  const [carePlansCount, setCarePlansCount] = useState(0);
-  const [careNavigatorsCount, setCareNavigatorsCount] = useState(0);
-  const [patientsCount, setPatientsCount] = useState(0);
-  const [appointmentCount, setAppointmentCount] = useState(0);
+  const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [upcomingAppointments, setUpcomingAppointments] = useState([]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(
-          "http://localhost:5000/api/appointments"
-        );
-        const upcomingAppointments = response.data.filter(
-          (appointment) => new Date(appointment.date) > new Date()
-        );
-        setAppointmentCount(response.data.length);
-        setUpcomingAppointments(upcomingAppointments);
-      } catch (error) {
-        setError(error);
-      }
-    };
-    fetchData();
+    axios
+      .get("http://localhost:5000/api/dashboard/stats")
+      .then((res) => {
+        setStats(res.data);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   }, []);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get("http://localhost:5000/api/careplans");
-        setCarePlansCount(response.data.length);
-      } catch (error) {
-        setError(error);
-      }
-    };
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(
-          "http://localhost:5000/api/carenavigators"
-        );
-        setCareNavigatorsCount(response.data.length);
-      } catch (error) {
-        setError(error);
-      }
-    };
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get("http://localhost:5000/api/patients");
-        setPatientsCount(response.data.length);
-      } catch (error) {
-        setError(error);
-      }
-    };
-    fetchData();
-  }, []);
+  if (loading || !stats) {
+    return (
+      <Box className="flex justify-center items-center h-96">
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 3,
-        p: 3,
-      }}
-    >
-      <Typography
-        variant="h4"
-        component="h1"
-        sx={{ mt: 4, color: "#09D1C7", textAlign: "center" }}
-      >
-        Admin View
+    <Box className="p-6 mt-10">
+      <Typography variant="h4" className="mb-8 text-center text-[#09D1C7]">
+        Admin Dashboard
       </Typography>
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: {
-            xs: "1fr",
-            md: "repeat(2, 1fr)",
-            lg: "repeat(3, 1fr)",
-          },
-          gap: 3,
-        }}
-      >
-        {/*  dashboard content */}
-        <Box
-          sx={{
-            p: 3,
-            borderRadius: 2,
-            backgroundColor: "background.paper",
-            boxShadow: 1,
-          }}
-        >
-          <Typography variant="h6">Total Registered Patients</Typography>
-          <Typography variant="body1" color="text.secondary">
-            {patientsCount}
-          </Typography>
-        </Box>
+      <Grid container spacing={3} className="mb-8">
+        <Grid item xs={12} sm={6} md={3}>
+          <Paper className="p-4 text-center">
+            <Typography variant="h6">Total Patients</Typography>
+            <Typography variant="h4">{stats.totalPatients}</Typography>
+            <Chip
+              label={`+${stats.newThisMonth} this month`}
+              color="success"
+              className="mt-2"
+            />
+          </Paper>
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <Paper className="p-4 text-center">
+            <Typography variant="h6">Care Navigators</Typography>
+            <Typography variant="h4">{stats.totalCareNavigators}</Typography>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <Paper className="p-4 text-center">
+            <Typography variant="h6">Care Plans</Typography>
+            <Typography variant="h4">{stats.totalCarePlans}</Typography>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <Paper className="p-4 text-center">
+            <Typography variant="h6">Appointments</Typography>
+            <Typography variant="h4">{stats.totalAppointments}</Typography>
+          </Paper>
+        </Grid>
+      </Grid>
 
-        <Box
-          sx={{
-            p: 3,
-            borderRadius: 2,
-            backgroundColor: "background.paper",
-            boxShadow: 1,
-          }}
-        >
-          <Typography variant="h6">Total Care Plans</Typography>
-          <Typography variant="body1" color="text.secondary">
-            {carePlansCount}
-          </Typography>
-        </Box>
+      <Grid container spacing={3} className="mb-8">
+        <Grid item xs={12} md={6}>
+          <Paper className="p-4">
+            <Typography variant="h6" className="mb-2">
+              Patients Status
+            </Typography>
+            <PieChart
+              series={[
+                {
+                  data: [
+                    { id: 0, value: stats.activePatients, label: "Active" },
+                    { id: 1, value: stats.inactivePatients, label: "Inactive" },
+                  ],
+                },
+              ]}
+              width={350}
+              height={200}
+            />
+          </Paper>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Paper className="p-4">
+            <Typography variant="h6" className="mb-2">
+              Care Plans by Status
+            </Typography>
+            <PieChart
+              series={[
+                {
+                  data: stats.carePlansByStatus.map((s, i) => ({
+                    id: i,
+                    value: s.count,
+                    label: s.status,
+                  })),
+                },
+              ]}
+              width={350}
+              height={200}
+            />
+          </Paper>
+        </Grid>
+      </Grid>
 
-        <Box
-          sx={{
-            p: 3,
-            borderRadius: 2,
-            backgroundColor: "background.paper",
-            boxShadow: 1,
-          }}
-        >
-          <Typography variant="h6">Total Care Navigators</Typography>
-          <Typography variant="body1" color="text.secondary">
-            {careNavigatorsCount}
-          </Typography>
-        </Box>
+      <Grid container spacing={3} className="mb-8">
+        <Grid item xs={12} md={6}>
+          <Paper className="p-4">
+            <Typography variant="h6" className="mb-2">
+              Most Common Allergies
+            </Typography>
+            {stats.mostCommonAllergies.map((a) => (
+              <Chip
+                key={a.allergy}
+                label={`${a.allergy} (${a.count})`}
+                className="mr-2 mb-2"
+              />
+            ))}
+          </Paper>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Paper className="p-4">
+            <Typography variant="h6" className="mb-2">
+              Appointments by Status
+            </Typography>
+            <PieChart
+              series={[
+                {
+                  data: stats.appointmentsByStatus.map((s, i) => ({
+                    id: i,
+                    value: s.count,
+                    label: s.status,
+                  })),
+                },
+              ]}
+              width={350}
+              height={200}
+            />
+          </Paper>
+        </Grid>
+      </Grid>
 
-        <Box
-          sx={{
-            p: 3,
-            borderRadius: 2,
-            backgroundColor: "background.paper",
-            boxShadow: 1,
-          }}
-        >
-          <Typography variant="h6">Total Upcoming Appointments</Typography>
-          <Typography variant="body1" color="text.secondary">
-            {appointmentCount}
-          </Typography>
-        </Box>
-      </Box>
+      <Paper className="p-4">
+        <Typography variant="h6" className="mb-2">
+          Recent Registrations
+        </Typography>
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>User ID</TableCell>
+                <TableCell>Full Name</TableCell>
+                <TableCell>Registered At</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {stats.recentRegistrations.map((r) => (
+                <TableRow key={r.userId}>
+                  <TableCell>{r.userId}</TableCell>
+                  <TableCell>{r.fullName}</TableCell>
+                  <TableCell>
+                    {new Date(r.registeredAt).toLocaleDateString()}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
     </Box>
   );
 };
