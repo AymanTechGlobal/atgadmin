@@ -199,12 +199,7 @@ const Appointments = () => {
         ?.toString()
         .toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
-      appointment.patientName
-        ?.toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      appointment.careNavigator
-        ?.toLowerCase()
-        .includes(searchTerm.toLowerCase())
+      appointment.patientName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -228,7 +223,7 @@ const Appointments = () => {
       <Box className="flex justify-between items-left mb-4">
         <TextField
           variant="outlined"
-          placeholder="Search by ID, patient name, or care navigator"
+          placeholder="Search by ID, patient name"
           value={searchTerm}
           onChange={handleSearch}
           InputProps={{
@@ -253,7 +248,6 @@ const Appointments = () => {
               <TableRow>
                 <TableCell>Appointment ID</TableCell>
                 <TableCell>Patient Name</TableCell>
-                <TableCell>Care Navigator</TableCell>
                 <TableCell>Date</TableCell>
                 <TableCell>Time</TableCell>
                 <TableCell>Status</TableCell>
@@ -265,7 +259,6 @@ const Appointments = () => {
                 <TableRow key={appointment.appointmentId}>
                   <TableCell>{appointment.appointmentId}</TableCell>
                   <TableCell>{appointment.patientName}</TableCell>
-                  <TableCell>{appointment.careNavigator}</TableCell>
                   <TableCell>
                     {appointment.appointmentDate
                       ? new Date(
