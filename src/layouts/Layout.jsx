@@ -37,7 +37,7 @@ const Layout = () => {
           component="main"
           sx={{
             flexGrow: 1,
-            pt: "64px", // Height of the header
+            pt: "64px", 
             px: 3,
             py: 2,
             overflow: "auto",
@@ -51,3 +51,9 @@ const Layout = () => {
 };
 
 export default Layout;
+
+/* 
+Layout component for the app 
+This component is used to wrap the app in a layout that includes a sidebar and a header.
+
+*/

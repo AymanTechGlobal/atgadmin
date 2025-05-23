@@ -1,3 +1,7 @@
+// This page is used to view the patients registered in the mobile app
+// uses the backend/routes/patientRoutes.js to get the data
+// uses RDS DB directly to fetch the data
+
 import React, { useState, useEffect } from "react";
 import {
   Box,
@@ -9,23 +13,12 @@ import {
   TableHead,
   TableRow,
   Paper,
-  IconButton,
   InputAdornment,
   TextField,
   CircularProgress,
-  Card,
-  CardContent,
-  Grid,
   Chip,
-  Tooltip,
 } from "@mui/material";
-import {
-  Search as SearchIcon,
-  Person as PersonIcon,
-  LocalHospital as HospitalIcon,
-  Warning as WarningIcon,
-  Restore as RestoreIcon,
-} from "@mui/icons-material";
+import { Search as SearchIcon } from "@mui/icons-material";
 import axios from "axios";
 
 const API_URL = "http://localhost:5000/api/patients";

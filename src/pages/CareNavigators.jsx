@@ -1,3 +1,7 @@
+//Use to add, edit, delete and resend temp passwords for care navigators
+// use mongodb to store the data --> backend/routes/careNavigatorRoutes.js
+// Mobile App use RDS DB to take the data from the mongodb database
+
 import React, { useState, useEffect } from "react";
 import {
   Box,

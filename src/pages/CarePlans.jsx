@@ -1,3 +1,7 @@
+//This page is used to view the care plans created by the care navigators using the mobile app
+// fetch the data from the ----> backend/routes/carePlanRoutes.js
+// Uses RDS DB directly to fetch the data
+
 import React, { useState, useEffect } from "react";
 import {
   Box,

@@ -1,3 +1,6 @@
+// this component is the header of the app
+// it contains the logo, the profile and the logout button and the sidebar toggle button
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {

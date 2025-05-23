@@ -1,3 +1,5 @@
+// this component is used to create a flex container with space between the items
+
 const { Box } = require("@mui/material");
 const { styled } = require("@mui/system");
 

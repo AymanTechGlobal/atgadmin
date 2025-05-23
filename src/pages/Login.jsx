@@ -1,3 +1,10 @@
+// Login page for the admin panel
+// uses the backend/routes/login.js to authenticate the user
+// uses the backend/routes/adminController.js to get the admin data
+// public route --> no authentication required
+// use password hashing to secure the password
+// uses the jwt to authenticate the user
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";

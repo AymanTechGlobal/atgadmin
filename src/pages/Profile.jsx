@@ -1,3 +1,7 @@
+// This page is used to add, edit, delete the admins
+// uses the backend/routes/adminController.js to get the data
+// uses mongodb to store the data 
+
 import React, { useState, useEffect } from "react";
 import {
   Box,
@@ -5,7 +9,6 @@ import {
   Paper,
   TextField,
   Button,
-  Grid,
   CircularProgress,
   Table,
   TableBody,

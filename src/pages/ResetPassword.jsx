@@ -1,3 +1,6 @@
+// This page is used to reset the password for the admin
+// still under development
+
 import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";

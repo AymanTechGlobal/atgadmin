@@ -1,3 +1,9 @@
+// This page is the dashboard for the admin panel
+// it contains the stats of the mobileapp
+// it also contains the charts and the tables for the admin to view the data
+// it uses the backend/routes/dashboardRoutes.js to get the data
+// uses RDS DB directly to fetch the data
+
 import React, { useEffect, useState } from "react";
 import {
   Box,

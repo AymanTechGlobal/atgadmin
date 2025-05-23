@@ -1,7 +1,9 @@
+// this component is the sidebar of the app
+// contains the navigation items
+
 import React, { useEffect, useState } from "react";
 import {
   Box,
-  Divider,
   Drawer,
   IconButton,
   Typography,
@@ -52,7 +54,6 @@ const navItems = [
     path: "/user-engagement",
   },
   { text: "System Settings", icon: <SettingsOutlined />, path: "/profile" },
-  
 ];
 
 const Sidebar = ({
