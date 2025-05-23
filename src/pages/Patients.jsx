@@ -17,6 +17,7 @@ import {
   TextField,
   CircularProgress,
   Chip,
+  TablePagination,
 } from "@mui/material";
 import { Search as SearchIcon } from "@mui/icons-material";
 import axios from "axios";
@@ -28,6 +29,8 @@ const Patients = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   useEffect(() => {
     fetchPatients();
@@ -57,6 +60,21 @@ const Patients = () => {
       patient.userId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       patient.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       patient.contactNumber?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Pagination handlers
+  const handleChangePage = (event, newPage) => {
+    setCurrentPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setCurrentPage(0);
+  };
+
+  const paginatedPatients = filteredPatients.slice(
+    currentPage * rowsPerPage,
+    currentPage * rowsPerPage + rowsPerPage
   );
 
   const calculateAge = (dateOfBirth) => {
@@ -117,7 +135,7 @@ const Patients = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredPatients.map((patient) => (
+              {paginatedPatients.map((patient) => (
                 <TableRow
                   key={patient._id}
                   className="hover:bg-gray-50 transition-colors"
@@ -141,6 +159,16 @@ const Patients = () => {
               ))}
             </TableBody>
           </Table>
+          <TablePagination
+            component="div"
+            count={filteredPatients.length}
+            page={currentPage}
+            onPageChange={handleChangePage}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            rowsPerPageOptions={[10, 25, 50]}
+            labelRowsPerPage="Rows per page:"
+          />
         </TableContainer>
       )}
     </Box>

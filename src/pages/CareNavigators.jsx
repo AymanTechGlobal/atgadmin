@@ -24,6 +24,7 @@ import {
   Alert,
   Snackbar,
   CircularProgress,
+  TablePagination,
 } from "@mui/material";
 import {
   Search as SearchIcon,
@@ -53,6 +54,8 @@ const CareNavigators = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   useEffect(() => {
     fetchNavigators();
@@ -88,9 +91,7 @@ const CareNavigators = () => {
 
   const handleCloseUpdateDialog = () => {
     setOpenUpdateDialog(false);
-  };  
-
-  
+  };
 
   const handleOpenDialog = (navigator = null) => {
     if (navigator) {
@@ -101,7 +102,6 @@ const CareNavigators = () => {
         phone: navigator.phone,
         status: navigator.status,
         username: navigator.username.replace("cn_", ""),
-        
       });
     } else {
       setSelectedNavigator(null);
@@ -232,6 +232,21 @@ const CareNavigators = () => {
     navigator.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Pagination handlers
+  const handleChangePage = (event, newPage) => {
+    setCurrentPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setCurrentPage(0);
+  };
+
+  const paginatedNavigators = filteredNavigators.slice(
+    currentPage * rowsPerPage,
+    currentPage * rowsPerPage + rowsPerPage
+  );
+
   if (loading && navigators.length === 0) {
     return (
       <Box
@@ -322,13 +337,13 @@ const CareNavigators = () => {
                 <TableCell>Phone</TableCell>
                 <TableCell>Date Joined</TableCell>
                 <TableCell>Status</TableCell>
-                <TableCell>Actions</TableCell>
-                <TableCell>Username</TableCell>
                 <TableCell>Calendly Name</TableCell>
+                <TableCell>Username</TableCell>
+                <TableCell>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredNavigators.map((navigator) => (
+              {paginatedNavigators.map((navigator) => (
                 <TableRow
                   key={navigator._id}
                   data-testid={`navigator-row-${navigator._id}`}
@@ -362,6 +377,16 @@ const CareNavigators = () => {
               ))}
             </TableBody>
           </Table>
+          <TablePagination
+            component="div"
+            count={filteredNavigators.length}
+            page={currentPage}
+            onPageChange={handleChangePage}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            rowsPerPageOptions={[10, 25, 50]}
+            labelRowsPerPage="Rows per page:"
+          />
         </TableContainer>
       )}
 
@@ -514,7 +539,7 @@ const CareNavigators = () => {
           </Button>
         </DialogActions>
       </Dialog>
-       
+
       {/* ReSend Temp Passwords Dialog */}
 
       <Dialog

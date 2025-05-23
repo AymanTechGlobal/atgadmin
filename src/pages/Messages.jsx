@@ -29,6 +29,7 @@ import {
   TableHead,
   TableRow,
   Paper,
+  TablePagination,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import axios from "axios";
@@ -57,6 +58,8 @@ const Messages = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   // Fetch care navigators on mount
   useEffect(() => {
@@ -67,7 +70,10 @@ const Messages = () => {
         const res = await axios.get(CARE_NAVIGATOR_API, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        if (res.data.success) setCareNavigators(res.data.data);
+        if (res.data.success) {
+          // Only keep the email field
+          setCareNavigators(res.data.data.map((nav) => nav.email));
+        }
       } catch (err) {
         setError("Failed to fetch care navigators");
         setSnackbarOpen(true);
@@ -91,7 +97,10 @@ const Messages = () => {
         const res = await axios.get(url, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        if (res.data.success) setMessages(res.data.data);
+        if (res.data.success) {
+          setMessages(res.data.data);
+          setCurrentPage(0); // Reset to first page on tab change
+        }
       } catch (err) {
         setError("Failed to fetch messages");
         setSnackbarOpen(true);
@@ -178,15 +187,34 @@ const Messages = () => {
 
   // Helper: get display name for care navigator
   const getNavigatorName = (email) => {
-    const nav = careNavigators.find((n) => n.email === email);
-    return nav ? nav.name : email;
+    // Only email is available now
+    return email;
   };
+
+  // Pagination handlers
+  const handleChangePage = (event, newPage) => {
+    setCurrentPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setCurrentPage(0);
+  };
+
+  const paginatedMessages = messages.slice(
+    currentPage * rowsPerPage,
+    currentPage * rowsPerPage + rowsPerPage
+  );
 
   return (
     <Box className="w-full min-h-screen bg-gray-50 p-4 mt-8">
       <Box className="max-w-5xl mx-auto bg-white rounded-lg shadow-lg p-6 mt-4">
         <Box className="flex items-center justify-between mb-4 mt-4">
-          <Typography variant="h4" className="font-bold text-gray-800">
+          <Typography
+            variant="h4"
+            className="font-bold text-gray-800 "
+            sx={{ mb: 4, color: "#09D1C7", textAlign: "center" }}
+          >
             Messages
           </Typography>
           <Fab
@@ -226,7 +254,7 @@ const Messages = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {messages.length === 0 ? (
+                {paginatedMessages.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} align="center">
                       <Typography variant="body2" className="text-gray-500">
@@ -235,7 +263,7 @@ const Messages = () => {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  messages.map((msg) => (
+                  paginatedMessages.map((msg) => (
                     <TableRow
                       key={msg._id}
                       hover
@@ -261,6 +289,16 @@ const Messages = () => {
                 )}
               </TableBody>
             </Table>
+            <TablePagination
+              component="div"
+              count={messages.length}
+              page={currentPage}
+              onPageChange={handleChangePage}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+              rowsPerPageOptions={[5, 10, 25, 50]}
+              labelRowsPerPage="Rows per page:"
+            />
           </TableContainer>
         )}
         {/* Compose Modal */}
@@ -286,9 +324,9 @@ const Messages = () => {
                   tabIndex: 0,
                 }}
               >
-                {careNavigators.map((nav) => (
-                  <MenuItem key={nav.email} value={nav.email}>
-                    {nav.name} ({nav.email})
+                {careNavigators.map((email) => (
+                  <MenuItem key={email} value={email}>
+                    {email}
                   </MenuItem>
                 ))}
               </Select>

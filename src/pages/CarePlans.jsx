@@ -16,6 +16,7 @@ import {
   Paper,
   CircularProgress,
   Chip,
+  TablePagination,
 } from "@mui/material";
 import { Search as SearchIcon } from "@mui/icons-material";
 import InputAdornment from "@mui/material/InputAdornment";
@@ -28,6 +29,8 @@ const CarePlans = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   useEffect(() => {
     fetchCarePlans();
@@ -69,6 +72,21 @@ const CarePlans = () => {
     (plan) =>
       plan.patientname?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       plan.careNavigator?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Pagination handlers
+  const handleChangePage = (event, newPage) => {
+    setCurrentPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setCurrentPage(0);
+  };
+
+  const paginatedCarePlans = filteredCarePlans.slice(
+    currentPage * rowsPerPage,
+    currentPage * rowsPerPage + rowsPerPage
   );
 
   return (
@@ -114,7 +132,7 @@ const CarePlans = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredCarePlans.map((plan) => (
+              {paginatedCarePlans.map((plan) => (
                 <TableRow key={plan._id}>
                   <TableCell>{plan.patientname}</TableCell>
                   <TableCell>{plan.careNavigator}</TableCell>
@@ -138,6 +156,16 @@ const CarePlans = () => {
               ))}
             </TableBody>
           </Table>
+          <TablePagination
+            component="div"
+            count={filteredCarePlans.length}
+            page={currentPage}
+            onPageChange={handleChangePage}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            rowsPerPageOptions={[10, 25, 50]}
+            labelRowsPerPage="Rows per page:"
+          />
         </TableContainer>
       )}
       {error && (
