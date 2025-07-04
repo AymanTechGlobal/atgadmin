@@ -22,20 +22,34 @@ import {
 import { PieChart } from "@mui/x-charts/PieChart";
 import axios from "axios";
 import { API_ENDPOINTS } from "../config/api";
+import { testApiConnection, logApiConfig } from "../utils/apiTest";
+import ApiDebugger from "../components/ApiDebugger";
 
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [testResult, setTestResult] = useState(null);
 
   useEffect(() => {
+    // Log API configuration for debugging
+    logApiConfig();
+
     axios
       .get(API_ENDPOINTS.DASHBOARD_STATS)
       .then((res) => {
         setStats(res.data);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch((error) => {
+        console.error("Dashboard API Error:", error);
+        setLoading(false);
+      });
   }, []);
+
+  const handleTestApi = async () => {
+    const result = await testApiConnection();
+    setTestResult(result);
+  };
 
   if (loading || !stats) {
     return (
@@ -50,6 +64,9 @@ const Dashboard = () => {
       <Typography variant="h4" className="mb-8 text-center text-[#09D1C7]">
         Admin Dashboard
       </Typography>
+
+      {/* API Debugger */}
+      <ApiDebugger />
       <Grid container spacing={3} className="mb-8">
         <Grid item xs={12} sm={6} md={3}>
           <Paper className="p-4 text-center">
