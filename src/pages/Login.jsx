@@ -9,6 +9,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import { API_ENDPOINTS } from "../config/api";
 import {
   Box,
   Container,
@@ -52,7 +53,7 @@ const Login = () => {
       };
 
       const res = await axios.post(
-        "http://localhost:5000/api/auth/login",
+        API_ENDPOINTS.LOGIN,
         { email, password },
         config
       );

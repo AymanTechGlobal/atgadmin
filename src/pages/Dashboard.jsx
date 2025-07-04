@@ -21,6 +21,7 @@ import {
 } from "@mui/material";
 import { PieChart } from "@mui/x-charts/PieChart";
 import axios from "axios";
+import { API_ENDPOINTS } from "../config/api";
 
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
@@ -28,7 +29,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/dashboard/stats")
+      .get(API_ENDPOINTS.DASHBOARD_STATS)
       .then((res) => {
         setStats(res.data);
         setLoading(false);

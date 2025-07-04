@@ -21,8 +21,7 @@ import {
 } from "@mui/material";
 import { Search as SearchIcon } from "@mui/icons-material";
 import axios from "axios";
-
-const API_URL = "http://localhost:5000/api/patients";
+import { API_ENDPOINTS } from "../config/api";
 
 const Patients = () => {
   const [patients, setPatients] = useState([]);
@@ -39,7 +38,7 @@ const Patients = () => {
   const fetchPatients = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(API_URL);
+      const response = await axios.get(API_ENDPOINTS.PATIENTS);
       if (response.data.success) {
         setPatients(response.data.data);
       }

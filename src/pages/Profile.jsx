@@ -1,6 +1,6 @@
 // This page is used to add, edit, delete the admins
 // uses the backend/routes/adminController.js to get the data
-// uses mongodb to store the data 
+// uses mongodb to store the data
 
 import React, { useState, useEffect } from "react";
 import {
@@ -30,8 +30,7 @@ import {
   Delete as DeleteIcon,
 } from "@mui/icons-material";
 import axios from "axios";
-
-const API_URL = "http://localhost:5000/api/admin";
+import { API_ENDPOINTS } from "../config/api";
 
 const Profile = () => {
   const [admins, setAdmins] = useState([]);
@@ -55,7 +54,7 @@ const Profile = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get(API_URL, {
+      const response = await axios.get(API_ENDPOINTS.ADMIN, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -115,7 +114,7 @@ const Profile = () => {
       const token = localStorage.getItem("token");
       if (selectedAdmin) {
         const response = await axios.put(
-          `${API_URL}/${selectedAdmin._id}`,
+          `${API_ENDPOINTS.ADMIN}/${selectedAdmin._id}`,
           formData,
           {
             headers: {
@@ -129,7 +128,7 @@ const Profile = () => {
           handleCloseDialog();
         }
       } else {
-        const response = await axios.post(API_URL, formData, {
+        const response = await axios.post(API_ENDPOINTS.ADMIN, formData, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -155,7 +154,7 @@ const Profile = () => {
     if (window.confirm("Are you sure you want to delete this admin?")) {
       try {
         const token = localStorage.getItem("token");
-        const response = await axios.delete(`${API_URL}/${id}`, {
+        const response = await axios.delete(`${API_ENDPOINTS.ADMIN}/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

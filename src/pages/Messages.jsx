@@ -33,9 +33,7 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import axios from "axios";
-
-const CARE_NAVIGATOR_API = "http://localhost:5000/api/care-navigators";
-const MESSAGES_API = "http://localhost:5000/api/messages";
+import { API_ENDPOINTS } from "../config/api";
 const ADMIN_EMAIL = "atghealthcare.admin@gmail.com";
 
 const tabOptions = [
@@ -67,7 +65,7 @@ const Messages = () => {
       setLoading(true);
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.get(CARE_NAVIGATOR_API, {
+        const res = await axios.get(API_ENDPOINTS.CARE_NAVIGATORS, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.data.success) {
@@ -92,7 +90,7 @@ const Messages = () => {
         const token = localStorage.getItem("token");
         let status = tab === "inbox" ? undefined : tab;
         let user = ADMIN_EMAIL;
-        let url = `${MESSAGES_API}?user=${user}`;
+        let url = `${API_ENDPOINTS.MESSAGES}?user=${user}`;
         if (status) url += `&status=${status}`;
         const res = await axios.get(url, {
           headers: { Authorization: `Bearer ${token}` },
@@ -138,7 +136,7 @@ const Messages = () => {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.post(
-        `${MESSAGES_API}/send`,
+        `${API_ENDPOINTS.MESSAGES}/send`,
         { ...composeForm },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -163,7 +161,7 @@ const Messages = () => {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.post(
-        `${MESSAGES_API}/draft`,
+        `${API_ENDPOINTS.MESSAGES}/draft`,
         { ...composeForm },
         { headers: { Authorization: `Bearer ${token}` } }
       );

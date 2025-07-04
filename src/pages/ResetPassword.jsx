@@ -4,6 +4,7 @@
 import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
+import { API_ENDPOINTS } from "../config/api";
 import {
   Box,
   Container,
@@ -33,10 +34,9 @@ const ResetPassword = () => {
     setSuccess("");
 
     try {
-      const response = await axios.post(
-        "http://localhost:5000/api/auth/reset-password-request",
-        { email }
-      );
+      const response = await axios.post(API_ENDPOINTS.RESET_PASSWORD_REQUEST, {
+        email,
+      });
       setSuccess(response.data.message);
     } catch (err) {
       setError(err.response?.data?.message || "An error occurred");
@@ -58,10 +58,10 @@ const ResetPassword = () => {
     }
 
     try {
-      const response = await axios.post(
-        "http://localhost:5000/api/auth/reset-password",
-        { token, newPassword }
-      );
+      const response = await axios.post(API_ENDPOINTS.RESET_PASSWORD, {
+        token,
+        newPassword,
+      });
       setSuccess(response.data.message);
       setTimeout(() => navigate("/login"), 2000);
     } catch (err) {
