@@ -33,8 +33,9 @@ import {
   Delete as DeleteIcon,
 } from "@mui/icons-material";
 import axios from "axios";
+import { API_ENDPOINTS } from "../config/api";
 
-const API_URL = "http://localhost:5000/api/care-navigators";
+const API_URL = API_ENDPOINTS.CARE_NAVIGATORS;
 
 const CareNavigators = () => {
   const [navigators, setNavigators] = useState([]);

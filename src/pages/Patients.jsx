@@ -23,10 +23,12 @@ import { Search as SearchIcon } from "@mui/icons-material";
 import axios from "axios";
 import { API_ENDPOINTS } from "../config/api";
 
+const API_URL = API_ENDPOINTS.PATIENTS;
+
 const Patients = () => {
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -38,12 +40,11 @@ const Patients = () => {
   const fetchPatients = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(API_ENDPOINTS.PATIENTS);
+      const response = await axios.get(API_URL);
       if (response.data.success) {
         setPatients(response.data.data);
       }
     } catch (error) {
-      setError("Error fetching patient details");
       console.error("Error fetching patients", error);
     } finally {
       setLoading(false);

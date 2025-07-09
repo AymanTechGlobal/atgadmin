@@ -61,4 +61,6 @@ export const axiosConfig = {
   },
 };
 
+// Export API_BASE_URL as both named and default export
+export { API_BASE_URL };
 export default API_BASE_URL;

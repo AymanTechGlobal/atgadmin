@@ -29,7 +29,6 @@ import EnvCheck from "../components/EnvCheck";
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [testResult, setTestResult] = useState(null);
 
   useEffect(() => {
     // Log API configuration for debugging
@@ -46,11 +45,6 @@ const Dashboard = () => {
         setLoading(false);
       });
   }, []);
-
-  const handleTestApi = async () => {
-    const result = await testApiConnection();
-    setTestResult(result);
-  };
 
   if (loading || !stats) {
     return (

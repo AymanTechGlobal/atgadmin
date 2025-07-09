@@ -21,8 +21,9 @@ import {
 import { Search as SearchIcon } from "@mui/icons-material";
 import InputAdornment from "@mui/material/InputAdornment";
 import axios from "axios";
+import { API_ENDPOINTS } from "../config/api";
 
-const API_URL = "http://localhost:5000/api/careplans";
+const API_URL = API_ENDPOINTS.CARE_PLANS;
 
 const CarePlans = () => {
   const [careplans, setCareplans] = useState([]);

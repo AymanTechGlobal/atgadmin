@@ -37,9 +37,10 @@ import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import axios from "axios";
-import { spacing } from "@mui/system";
 import { format } from "date-fns";
-const API_URL = "http://localhost:5000/api/appointments";
+import { API_ENDPOINTS } from "../config/api";
+
+const API_URL = API_ENDPOINTS.APPOINTMENTS;
 
 //  end points
 //  /appointment
