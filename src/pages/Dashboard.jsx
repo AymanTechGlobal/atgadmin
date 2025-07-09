@@ -24,6 +24,7 @@ import axios from "axios";
 import { API_ENDPOINTS } from "../config/api";
 import { testApiConnection, logApiConfig } from "../utils/apiTest";
 import ApiDebugger from "../components/ApiDebugger";
+import EnvCheck from "../components/EnvCheck";
 
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
@@ -64,6 +65,9 @@ const Dashboard = () => {
       <Typography variant="h4" className="mb-8 text-center text-[#09D1C7]">
         Admin Dashboard
       </Typography>
+
+      {/* Environment Check */}
+      <EnvCheck />
 
       {/* API Debugger */}
       <ApiDebugger />

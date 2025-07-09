@@ -1,7 +1,24 @@
 // API Configuration
 // This file centralizes all API-related configuration
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+// Determine the correct API URL
+const getApiBaseUrl = () => {
+  // Check if we're in production and environment variable is not set
+  if (process.env.NODE_ENV === "production" && !process.env.REACT_APP_API_URL) {
+    console.warn("⚠️ REACT_APP_API_URL not set in production, using fallback");
+    return "https://atg-admin-backend.onrender.com";
+  }
+
+  return process.env.REACT_APP_API_URL || "http://localhost:5000";
+};
+
+const API_BASE_URL = getApiBaseUrl();
+
+// Debug logging
+console.log("🔧 API Configuration Debug:");
+console.log("📍 REACT_APP_API_URL:", process.env.REACT_APP_API_URL);
+console.log("🔗 API_BASE_URL:", API_BASE_URL);
+console.log("🌐 Environment:", process.env.NODE_ENV);
 
 // API endpoints
 export const API_ENDPOINTS = {
