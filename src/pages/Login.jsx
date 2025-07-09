@@ -7,9 +7,8 @@
 
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
-import { API_ENDPOINTS } from "../config/api";
+import { useAuth } from "../context/AuthContext";
 import {
   Box,
   Container,
@@ -33,6 +32,7 @@ const Login = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const { email, password } = formData;
 
@@ -46,23 +46,16 @@ const Login = () => {
     setError("");
 
     try {
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      };
+      const result = await login(email, password);
 
-      const res = await axios.post(
-        API_ENDPOINTS.LOGIN,
-        { email, password },
-        config
-      );
-
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
-      navigate("/Dashboard");
+      if (result.success) {
+        navigate("/Dashboard");
+      } else {
+        setError(result.error);
+      }
     } catch (err) {
-      setError(err.response?.data?.message || "An error occurred");
+      console.error("Login error:", err);
+      setError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }

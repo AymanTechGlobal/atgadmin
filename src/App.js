@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { theme } from "./theme";
+import { AuthProvider } from "./context/AuthContext";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import ResetPassword from "./pages/ResetPassword";
@@ -15,36 +16,38 @@ import CarePlans from "./pages/CarePlans";
 import Patients from "./pages/Patients";
 import Messages from "./pages/Messages";
 import UserEngagement from "./pages/UserEngagement";
-import Reports from "./pages/Reports";  
+import Reports from "./pages/Reports";
 import Profile from "./pages/Profile";
 
 function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Router>
-        <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route
-            element={
-              <ProtectedRoute>
-                <Layout />
-              </ProtectedRoute>
-            }
-          >
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/care-navigators" element={<CareNavigators />} />
-            <Route path="/appointment" element={<Appointments />} />
-            <Route path="/careplans" element={<CarePlans />} />
-            <Route path="/patients" element={<Patients />} />
-            <Route path="/messages" element={<Messages />} />
-            <Route path="/user-engagement" element={<UserEngagement />} />
-            <Route path="/reports" element={<Reports />} />
-            <Route path="/profile" element={<Profile />} />
-          </Route>
-        </Routes>
-      </Router>
+      <AuthProvider>
+        <Router>
+          <Routes>
+            <Route path="/" element={<Login />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route
+              element={
+                <ProtectedRoute>
+                  <Layout />
+                </ProtectedRoute>
+              }
+            >
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/care-navigators" element={<CareNavigators />} />
+              <Route path="/appointment" element={<Appointments />} />
+              <Route path="/careplans" element={<CarePlans />} />
+              <Route path="/patients" element={<Patients />} />
+              <Route path="/messages" element={<Messages />} />
+              <Route path="/user-engagement" element={<UserEngagement />} />
+              <Route path="/reports" element={<Reports />} />
+              <Route path="/profile" element={<Profile />} />
+            </Route>
+          </Routes>
+        </Router>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

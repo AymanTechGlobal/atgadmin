@@ -8,6 +8,8 @@ export const API_ENDPOINTS = {
   // Auth endpoints
   LOGIN: `${API_BASE_URL}/api/auth/login`,
   LOGOUT: `${API_BASE_URL}/api/logout`,
+  VALIDATE_TOKEN: `${API_BASE_URL}/api/auth/validate`,
+  GET_USER: `${API_BASE_URL}/api/auth/me`,
   RESET_PASSWORD_REQUEST: `${API_BASE_URL}/api/auth/reset-password-request`,
   RESET_PASSWORD: `${API_BASE_URL}/api/auth/reset-password`,
 

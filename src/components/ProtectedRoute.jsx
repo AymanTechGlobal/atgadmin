@@ -3,12 +3,21 @@
 
 import React from "react";
 import { Navigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { CircularProgress, Box } from "@mui/material";
 
 const ProtectedRoute = ({ children }) => {
-  const token = localStorage.getItem("token");
-  const user = JSON.parse(localStorage.getItem("user"));
+  const { isAuthenticated, loading } = useAuth();
 
-  if (!token || !user) {
+  if (loading) {
+    return (
+      <Box className="flex justify-center items-center h-screen">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (!isAuthenticated) {
     return <Navigate to="/" />;
   }
 
