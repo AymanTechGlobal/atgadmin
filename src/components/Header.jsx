@@ -44,7 +44,6 @@ const Header = ({ isSidebarOpen, setIsSidebarOpen }) => {
       localStorage.removeItem("user");
       navigate("/");
     } catch (error) {
-      console.error("Logout error:", error);
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       navigate("/");

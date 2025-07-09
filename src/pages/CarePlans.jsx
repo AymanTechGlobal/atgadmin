@@ -46,7 +46,6 @@ const CarePlans = () => {
       }
     } catch (error) {
       setError("Error fetching care plans");
-      console.error("Error fetching care plans", error);
     } finally {
       setLoading(false);
     }

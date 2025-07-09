@@ -22,18 +22,12 @@ import {
 import { PieChart } from "@mui/x-charts/PieChart";
 import axios from "axios";
 import { API_ENDPOINTS } from "../config/api";
-import { testApiConnection, logApiConfig } from "../utils/apiTest";
-import ApiDebugger from "../components/ApiDebugger";
-import EnvCheck from "../components/EnvCheck";
 
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Log API configuration for debugging
-    logApiConfig();
-
     axios
       .get(API_ENDPOINTS.DASHBOARD_STATS)
       .then((res) => {
@@ -41,7 +35,6 @@ const Dashboard = () => {
         setLoading(false);
       })
       .catch((error) => {
-        console.error("Dashboard API Error:", error);
         setLoading(false);
       });
   }, []);
@@ -60,11 +53,6 @@ const Dashboard = () => {
         Admin Dashboard
       </Typography>
 
-      {/* Environment Check */}
-      <EnvCheck />
-
-      {/* API Debugger */}
-      <ApiDebugger />
       <Grid container spacing={3} className="mb-8">
         <Grid item xs={12} sm={6} md={3}>
           <Paper className="p-4 text-center">

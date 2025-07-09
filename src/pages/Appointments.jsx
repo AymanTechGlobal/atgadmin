@@ -77,7 +77,6 @@ const Appointments = () => {
       }
     } catch (error) {
       setError("Error fetching appointments");
-      console.error("Error fetching appointments:", error);
     } finally {
       setLoading(false);
     }
@@ -90,7 +89,7 @@ const Appointments = () => {
         setLastSync(response.data.data.lastSync);
       }
     } catch (error) {
-      console.error("Error fetching sync status:", error);
+      // Handle error silently
     }
   };
 
@@ -182,7 +181,6 @@ const Appointments = () => {
         }
       } catch (error) {
         setError("Error deleting appointment");
-        console.error("Error deleting appointment:", error);
       } finally {
         setLoading(false);
       }

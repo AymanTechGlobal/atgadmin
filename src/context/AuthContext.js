@@ -52,7 +52,6 @@ export const AuthProvider = ({ children }) => {
             logout();
           }
         } catch (error) {
-          console.error("Token validation failed:", error);
           logout();
         }
       }
@@ -80,7 +79,6 @@ export const AuthProvider = ({ children }) => {
 
       return { success: true };
     } catch (error) {
-      console.error("Login error:", error);
       return {
         success: false,
         error: error.response?.data?.message || "Login failed",

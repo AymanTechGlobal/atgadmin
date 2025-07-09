@@ -64,7 +64,6 @@ const Profile = () => {
       }
     } catch (error) {
       setError("Error fetching admins");
-      console.error("Error fetching admins:", error);
     } finally {
       setLoading(false);
     }

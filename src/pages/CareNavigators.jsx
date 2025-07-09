@@ -76,7 +76,6 @@ const CareNavigators = () => {
       }
     } catch (error) {
       setError("Error fetching care navigators");
-      console.error("Error fetching care navigators:", error);
     } finally {
       setLoading(false);
     }
@@ -200,7 +199,6 @@ const CareNavigators = () => {
       }
     } catch (error) {
       setError("Error deleting care navigator");
-      console.error("Error deleting care navigator:", error);
     }
   };
 
@@ -220,7 +218,6 @@ const CareNavigators = () => {
       }
     } catch (error) {
       setError("Error resending temp passwords");
-      console.error("Error resending temp passwords:", error);
     }
   };
 

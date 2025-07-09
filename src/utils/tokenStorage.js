@@ -11,7 +11,6 @@ export const TokenStorage = {
       localStorage.setItem("token", token);
       return true;
     } catch (error) {
-      console.error("Error storing token:", error);
       return false;
     }
   },
@@ -25,7 +24,6 @@ export const TokenStorage = {
       }
       return token;
     } catch (error) {
-      console.error("Error retrieving token:", error);
       return null;
     }
   },
@@ -36,7 +34,6 @@ export const TokenStorage = {
       localStorage.removeItem("token");
       return true;
     } catch (error) {
-      console.error("Error removing token:", error);
       return false;
     }
   },
@@ -47,7 +44,6 @@ export const TokenStorage = {
       const token = localStorage.getItem("token");
       return !!token;
     } catch (error) {
-      console.error("Error checking token:", error);
       return false;
     }
   },
@@ -61,7 +57,6 @@ export const TokenStorage = {
       localStorage.setItem("user", JSON.stringify(user));
       return true;
     } catch (error) {
-      console.error("Error storing user data:", error);
       return false;
     }
   },
@@ -75,7 +70,6 @@ export const TokenStorage = {
       }
       return JSON.parse(user);
     } catch (error) {
-      console.error("Error retrieving user data:", error);
       return null;
     }
   },
@@ -86,7 +80,6 @@ export const TokenStorage = {
       localStorage.removeItem("user");
       return true;
     } catch (error) {
-      console.error("Error removing user data:", error);
       return false;
     }
   },
@@ -98,7 +91,6 @@ export const TokenStorage = {
       localStorage.removeItem("user");
       return true;
     } catch (error) {
-      console.error("Error clearing auth data:", error);
       return false;
     }
   },

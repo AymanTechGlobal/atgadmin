@@ -14,12 +14,6 @@ const getApiBaseUrl = () => {
 
 const API_BASE_URL = getApiBaseUrl();
 
-// Debug logging
-console.log("🔧 API Configuration Debug:");
-console.log("📍 REACT_APP_API_URL:", process.env.REACT_APP_API_URL);
-console.log("🔗 API_BASE_URL:", API_BASE_URL);
-console.log("🌐 Environment:", process.env.NODE_ENV);
-
 // API endpoints
 export const API_ENDPOINTS = {
   // Auth endpoints

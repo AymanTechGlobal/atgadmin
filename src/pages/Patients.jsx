@@ -45,7 +45,7 @@ const Patients = () => {
         setPatients(response.data.data);
       }
     } catch (error) {
-      console.error("Error fetching patients", error);
+      // Handle error silently
     } finally {
       setLoading(false);
     }
