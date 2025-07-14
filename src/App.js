@@ -15,7 +15,6 @@ import Appointments from "./pages/Appointments";
 import CarePlans from "./pages/CarePlans";
 import Patients from "./pages/Patients";
 import Messages from "./pages/Messages";
-import UserEngagement from "./pages/UserEngagement";
 import Reports from "./pages/Reports";
 import Profile from "./pages/Profile";
 
@@ -41,7 +40,6 @@ function App() {
               <Route path="/careplans" element={<CarePlans />} />
               <Route path="/patients" element={<Patients />} />
               <Route path="/messages" element={<Messages />} />
-              <Route path="/user-engagement" element={<UserEngagement />} />
               <Route path="/reports" element={<Reports />} />
               <Route path="/profile" element={<Profile />} />
             </Route>
