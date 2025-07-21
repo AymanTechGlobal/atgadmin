@@ -12,7 +12,8 @@ const getApiBaseUrl = () => {
   return process.env.REACT_APP_API_URL || "http://localhost:5000";
 };
 
-const API_BASE_URL = getApiBaseUrl();
+const API_BASE_URL = "http://localhost:5000";
+// const API_BASE_URL = getApiBaseUrl();
 
 // API endpoints
 export const API_ENDPOINTS = {

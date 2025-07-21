@@ -37,6 +37,9 @@ import { API_ENDPOINTS } from "../config/api";
 
 const API_URL = API_ENDPOINTS.CARE_NAVIGATORS;
 
+const LAMBDA_API_ENDPOINT =
+  "https://uqzl6jyqvg.execute-api.ap-south-1.amazonaws.com/dev/newTempPWDRequest";
+
 const CareNavigators = () => {
   const [navigators, setNavigators] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -204,6 +207,14 @@ const CareNavigators = () => {
 
   //resend temp passwords check with backend
   const handleResendTempPasswords = async () => {
+    setError(null);
+    setSuccess(null);
+
+    if (!formData.username || !formData.tempPWD) {
+      setError("Username is required to resend the temporary password.");
+      return;
+    }
+
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(`${API_URL}/resend-temp-passwords`, {
@@ -212,6 +223,32 @@ const CareNavigators = () => {
           Authorization: `Bearer ${token}`,
         },
       });
+
+      // Call the Cognito Lambda function via API Gateway
+      const lambdaResponse = await fetch(LAMBDA_API_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: formData.username?.trim(),
+          tempPWD: formData.tempPWD,
+        }),
+      });
+
+      const lambdaResult = await lambdaResponse.json();
+      const parsedBody =
+        typeof lambdaResult.body === "string"
+          ? JSON.parse(lambdaResult.body)
+          : lambdaResult.body;
+
+      if (lambdaResult.statusCode !== 200 || !parsedBody.success) {
+        setError(
+          parsedBody.message || "Failed to request a new temporary password."
+        );
+        return;
+      }
+
       if (response.data.success) {
         setSuccess("Temp passwords resent successfully");
         fetchNavigators();
@@ -561,6 +598,22 @@ const CareNavigators = () => {
               inputProps={{
                 "aria-label": "Username",
                 "data-testid": "username-input",
+              }}
+            />
+          </Box>
+        </DialogContent>
+        <DialogContent>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 2 }}>
+            <TextField
+              label="TempPWD"
+              name="tempPWD"
+              value={formData.tempPWD}
+              onChange={handleInputChange}
+              fullWidth
+              required
+              inputProps={{
+                "aria-label": "TempPWD",
+                "data-testid": "tempPWD-input",
               }}
             />
           </Box>
