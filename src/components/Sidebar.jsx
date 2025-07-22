@@ -48,11 +48,6 @@ const navItems = [
   { text: "System Analytics", icon: null },
   { text: "Reports", icon: <BarChartOutlined />, path: "/reports" },
 
-  {
-    text: "User Engagement",
-    icon: <BarChartOutlined />,
-    path: "/user-engagement",
-  },
   { text: "System Settings", icon: <SettingsOutlined />, path: "/profile" },
 ];
 
