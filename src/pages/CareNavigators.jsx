@@ -204,20 +204,51 @@ const CareNavigators = () => {
 
   //resend temp passwords check with backend
   const handleResendTempPasswords = async () => {
+    setError(null);
+    setSuccess(null);
+    setLoading(true);
+
+    if (!formData.username || !formData.tempPWD) {
+      setError("Both Username and Temporary Password are required to reset the temporary password.");
+      setLoading(false);
+      return;
+    }
+
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.post(`${API_URL}/resend-temp-passwords`, {
-        username: formData.username,
+      const response = await axios.post(`${API_URL}/resend-temp-password`, 
+        {
+          username: formData.username,
+          tempPWD: formData.tempPWD,
+        }, 
+        {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
+
+      if (response.data.success) {
+        setSuccess("Temporary password updated successfully");
+        handleCloseUpdateDialog();
+        setFormData({
+          ...formData,
+          username: "",
+          tempPWD: "",
+        });
+      }
+
       if (response.data.success) {
         setSuccess("Temp passwords resent successfully");
         fetchNavigators();
       }
     } catch (error) {
-      setError("Error resending temp passwords");
+      if (error.response?.data?.errors) {
+        setError(error.response.data.errors.join(", "));
+      } else {
+        setError(error.response?.data?.message || "Error updating temporary password");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -538,7 +569,7 @@ const CareNavigators = () => {
         </DialogActions>
       </Dialog>
 
-      {/* ReSend Temp Passwords Dialog */}
+      {/* Set New Temp Passwords Dialog */}
 
       <Dialog
         open={openUpdateDialog}
@@ -548,7 +579,7 @@ const CareNavigators = () => {
           sx: { borderRadius: "12px" },
         }}
       >
-        <DialogTitle>ReSend Temp Passwords</DialogTitle>
+        <DialogTitle> Set New Temp Password</DialogTitle>
         <DialogContent>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 2 }}>
             <TextField
@@ -561,6 +592,22 @@ const CareNavigators = () => {
               inputProps={{
                 "aria-label": "Username",
                 "data-testid": "username-input",
+              }}
+            />
+          </Box>
+        </DialogContent>
+        <DialogContent>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 2 }}>
+            <TextField
+              label="TempPWD"
+              name="tempPWD"
+              value={formData.tempPWD}
+              onChange={handleInputChange}
+              fullWidth
+              required
+              inputProps={{
+                "aria-label": "TempPWD",
+                "data-testid": "tempPWD-input",
               }}
             />
           </Box>
