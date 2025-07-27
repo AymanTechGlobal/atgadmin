@@ -4,10 +4,10 @@
 // Determine the correct API URL
 const getApiBaseUrl = () => {
   //Check if we're in production and environment variable is not set
-  // if (process.env.NODE_ENV === "production" && !process.env.REACT_APP_API_URL) {
-  //   console.warn("⚠️ REACT_APP_API_URL not set in production, using fallback");
-  //   return "https://atg-admin-backend.onrender.com";
-  // }
+  if (process.env.NODE_ENV === "production" && !process.env.REACT_APP_API_URL) {
+    console.warn("⚠️ REACT_APP_API_URL not set in production, using fallback");
+    return "https://atg-admin-backend.onrender.com";
+  }
 
   return process.env.REACT_APP_API_URL || "http://localhost:5000";
 };
