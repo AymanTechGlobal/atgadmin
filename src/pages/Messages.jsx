@@ -1,5 +1,5 @@
 // This page is used to send messages to the care navigators
-// sending messages from atghealthcare.admin@gmail.com
+// sending messages from akindukodithuwakku@gmail.com (business email)
 // sending, receiving, drafts, sent messages will be shown in the table and stored in the database
 
 import React, { useState, useEffect } from "react";
@@ -30,16 +30,31 @@ import {
   TableRow,
   Paper,
   TablePagination,
+  Chip,
+  IconButton,
+  Tooltip,
+  Card,
+  CardContent,
+  Grid,
 } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
+import {
+  Add as AddIcon,
+  Send as SendIcon,
+  Save as SaveIcon,
+  Email as EmailIcon,
+  Drafts as DraftsIcon,
+  Inbox as InboxIcon,
+  Refresh as RefreshIcon,
+} from "@mui/icons-material";
 import axios from "axios";
 import { API_ENDPOINTS } from "../config/api";
-const ADMIN_EMAIL = "atghealthcare.admin@gmail.com";
+
+const BUSINESS_EMAIL = "akinduscience@gmail.com";
 
 const tabOptions = [
-  { label: "Inbox", value: "inbox" },
-  { label: "Sent", value: "sent" },
-  { label: "Drafts", value: "draft" },
+  { label: "Inbox", value: "inbox", icon: <InboxIcon /> },
+  { label: "Sent", value: "sent", icon: <EmailIcon /> },
+  { label: "Drafts", value: "draft", icon: <DraftsIcon /> },
 ];
 
 const Messages = () => {
@@ -58,6 +73,11 @@ const Messages = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [messageStats, setMessageStats] = useState({
+    total: 0,
+    sent: 0,
+    draft: 0,
+  });
 
   // Fetch care navigators on mount
   useEffect(() => {
@@ -89,7 +109,7 @@ const Messages = () => {
       try {
         const token = localStorage.getItem("token");
         let status = tab === "inbox" ? undefined : tab;
-        let user = ADMIN_EMAIL;
+        let user = BUSINESS_EMAIL;
         let url = `${API_ENDPOINTS.MESSAGES}?user=${user}`;
         if (status) url += `&status=${status}`;
         const res = await axios.get(url, {
@@ -108,6 +128,27 @@ const Messages = () => {
     };
     fetchMessages();
   }, [tab]);
+
+  // Fetch message statistics
+  useEffect(() => {
+    const fetchMessageStats = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await axios.get(
+          `${API_ENDPOINTS.MESSAGES}/stats?user=${BUSINESS_EMAIL}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        if (res.data.success) {
+          setMessageStats(res.data.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch message stats:", err);
+      }
+    };
+    fetchMessageStats();
+  }, [messages]);
 
   const handleTabChange = (event, newValue) => {
     setTab(newValue);
@@ -130,6 +171,12 @@ const Messages = () => {
   };
 
   const handleSend = async () => {
+    if (!composeForm.to || !composeForm.subject || !composeForm.body) {
+      setError("Please fill in all required fields");
+      setSnackbarOpen(true);
+      return;
+    }
+
     setLoading(true);
     setError("");
     setSuccess("");
@@ -141,13 +188,19 @@ const Messages = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (res.data.success) {
-        setSuccess("Message sent successfully");
+        setSuccess(res.data.message || "Message sent successfully");
         setSnackbarOpen(true);
         setComposeOpen(false);
         setTab("sent");
+        // Refresh messages
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
       }
     } catch (err) {
-      setError("Failed to send message");
+      const errorMessage =
+        err.response?.data?.error || "Failed to send message";
+      setError(errorMessage);
       setSnackbarOpen(true);
     } finally {
       setLoading(false);
@@ -155,6 +208,12 @@ const Messages = () => {
   };
 
   const handleSaveDraft = async () => {
+    if (!composeForm.to || !composeForm.subject || !composeForm.body) {
+      setError("Please fill in all required fields");
+      setSnackbarOpen(true);
+      return;
+    }
+
     setLoading(true);
     setError("");
     setSuccess("");
@@ -166,13 +225,18 @@ const Messages = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (res.data.success) {
-        setSuccess("Draft saved successfully");
+        setSuccess(res.data.message || "Draft saved successfully");
         setSnackbarOpen(true);
         setComposeOpen(false);
         setTab("draft");
+        // Refresh messages
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
       }
     } catch (err) {
-      setError("Failed to save draft");
+      const errorMessage = err.response?.data?.error || "Failed to save draft";
+      setError(errorMessage);
       setSnackbarOpen(true);
     } finally {
       setLoading(false);
@@ -183,10 +247,25 @@ const Messages = () => {
     setSnackbarOpen(false);
   };
 
+  const handleRefresh = () => {
+    window.location.reload();
+  };
+
   // Helper: get display name for care navigator
   const getNavigatorName = (email) => {
-    // Only email is available now
     return email;
+  };
+
+  // Get status color for chips
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "sent":
+        return "success";
+      case "draft":
+        return "warning";
+      default:
+        return "default";
+    }
   };
 
   // Pagination handlers
@@ -206,25 +285,72 @@ const Messages = () => {
 
   return (
     <Box className="w-full min-h-screen bg-gray-50 p-4 mt-8">
-      <Box className="max-w-5xl mx-auto bg-white rounded-lg shadow-lg p-6 mt-4">
-        <Box className="flex items-center justify-between mb-4 mt-4">
+      <Box className="max-w-6xl mx-auto bg-white rounded-lg shadow-lg p-6 mt-4">
+        <Box className="flex items-center justify-between mb-6 mt-4">
           <Typography
             variant="h4"
-            className="font-bold text-gray-800 "
-            sx={{ mb: 4, color: "#09D1C7", textAlign: "center" }}
+            className="font-bold text-gray-800"
+            sx={{ color: "#09D1C7", textAlign: "center" }}
           >
-            Messages
+            Professional Communication
           </Typography>
-          <Fab
-            color="primary"
-            aria-label="compose"
-            onClick={handleComposeOpen}
-            className="ml-4"
-            size="medium"
-          >
-            <AddIcon />
-          </Fab>
+          <Box display="flex" gap={2}>
+            <Tooltip title="Refresh Messages">
+              <IconButton onClick={handleRefresh} color="primary">
+                <RefreshIcon />
+              </IconButton>
+            </Tooltip>
+            <Fab
+              color="primary"
+              aria-label="compose"
+              onClick={handleComposeOpen}
+              size="medium"
+            >
+              <AddIcon />
+            </Fab>
+          </Box>
         </Box>
+
+        {/* Message Statistics */}
+        <Grid container spacing={2} className="mb-4">
+          <Grid item xs={12} sm={4}>
+            <Card>
+              <CardContent className="text-center">
+                <Typography variant="h6" color="primary">
+                  {messageStats.total}
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Total Messages
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <Card>
+              <CardContent className="text-center">
+                <Typography variant="h6" color="success.main">
+                  {messageStats.sent}
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Sent Messages
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <Card>
+              <CardContent className="text-center">
+                <Typography variant="h6" color="warning.main">
+                  {messageStats.draft}
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Draft Messages
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+
         <Tabs
           value={tab}
           onChange={handleTabChange}
@@ -232,9 +358,16 @@ const Messages = () => {
           className="mb-4"
         >
           {tabOptions.map((t) => (
-            <Tab key={t.value} label={t.label} value={t.value} />
+            <Tab
+              key={t.value}
+              label={t.label}
+              value={t.value}
+              icon={t.icon}
+              iconPosition="start"
+            />
           ))}
         </Tabs>
+
         {loading ? (
           <Box className="flex justify-center items-center h-40">
             <CircularProgress />
@@ -256,7 +389,7 @@ const Messages = () => {
                   <TableRow>
                     <TableCell colSpan={5} align="center">
                       <Typography variant="body2" className="text-gray-500">
-                        No messages found.
+                        No messages found in {tab}.
                       </Typography>
                     </TableCell>
                   </TableRow>
@@ -270,8 +403,8 @@ const Messages = () => {
                     >
                       <TableCell>{getNavigatorName(msg.to)}</TableCell>
                       <TableCell>
-                        {msg.from === ADMIN_EMAIL
-                          ? "Admin"
+                        {msg.from === BUSINESS_EMAIL
+                          ? "Business Admin"
                           : getNavigatorName(msg.from)}
                       </TableCell>
                       <TableCell>{msg.subject}</TableCell>
@@ -279,8 +412,14 @@ const Messages = () => {
                         {new Date(msg.createdAt).toLocaleString()}
                       </TableCell>
                       <TableCell>
-                        {msg.status.charAt(0).toUpperCase() +
-                          msg.status.slice(1)}
+                        <Chip
+                          label={
+                            msg.status.charAt(0).toUpperCase() +
+                            msg.status.slice(1)
+                          }
+                          color={getStatusColor(msg.status)}
+                          size="small"
+                        />
                       </TableCell>
                     </TableRow>
                   ))
@@ -299,23 +438,31 @@ const Messages = () => {
             />
           </TableContainer>
         )}
+
         {/* Compose Modal */}
         <Dialog
           open={composeOpen}
           onClose={handleComposeClose}
           fullWidth
-          maxWidth="sm"
+          maxWidth="md"
         >
-          <DialogTitle>Compose Message</DialogTitle>
+          <DialogTitle>
+            <Typography variant="h6" color="primary">
+              Compose Professional Message
+            </Typography>
+            <Typography variant="body2" color="textSecondary">
+              Send from: {BUSINESS_EMAIL}
+            </Typography>
+          </DialogTitle>
           <DialogContent>
-            <FormControl fullWidth className="my-2">
-              <InputLabel id="to-label">To</InputLabel>
+            <FormControl fullWidth className="my-3">
+              <InputLabel id="to-label">To (Care Navigator)</InputLabel>
               <Select
                 labelId="to-label"
                 name="to"
                 value={composeForm.to}
                 onChange={handleFormChange}
-                label="To"
+                label="To (Care Navigator)"
                 required
                 inputProps={{
                   "aria-label": "Select care navigator",
@@ -342,7 +489,7 @@ const Messages = () => {
                 "aria-label": "Subject",
                 tabIndex: 0,
               }}
-              className="my-2"
+              className="my-3"
             />
             <TextField
               margin="dense"
@@ -351,7 +498,7 @@ const Messages = () => {
               type="text"
               fullWidth
               multiline
-              minRows={4}
+              minRows={6}
               value={composeForm.body}
               onChange={handleFormChange}
               required
@@ -359,14 +506,21 @@ const Messages = () => {
                 "aria-label": "Message body",
                 tabIndex: 0,
               }}
-              className="my-2"
+              className="my-3"
+              placeholder="Write your professional message here..."
             />
           </DialogContent>
           <DialogActions>
             <Button onClick={handleComposeClose} color="secondary">
               Cancel
             </Button>
-            <Button onClick={handleSaveDraft} color="info" variant="outlined">
+            <Button
+              onClick={handleSaveDraft}
+              color="info"
+              variant="outlined"
+              startIcon={<SaveIcon />}
+              disabled={loading}
+            >
               Save as Draft
             </Button>
             <Button
@@ -374,15 +528,19 @@ const Messages = () => {
               color="primary"
               variant="contained"
               disabled={loading}
+              startIcon={
+                loading ? <CircularProgress size={20} /> : <SendIcon />
+              }
             >
-              {loading ? <CircularProgress size={24} /> : "Send"}
+              {loading ? "Sending..." : "Send Message"}
             </Button>
           </DialogActions>
         </Dialog>
+
         {/* Snackbar for feedback */}
         <Snackbar
           open={snackbarOpen}
-          autoHideDuration={4000}
+          autoHideDuration={6000}
           onClose={handleSnackbarClose}
           anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
         >

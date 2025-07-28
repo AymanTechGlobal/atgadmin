@@ -1,5 +1,4 @@
-// This page is used to view the reports for the admin
-// still under development
+// This page is used to view the business overview report for the admin
 
 import React, { useState, useEffect } from "react";
 import {
@@ -11,24 +10,19 @@ import {
   Card,
   CardContent,
   Chip,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tabs,
-  Tab,
   Button,
+  Alert,
+  IconButton,
+  Tooltip,
+  Snackbar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
-  TextField,
-  Alert,
-  IconButton,
-  Tooltip,
-  LinearProgress,
 } from "@mui/material";
 import {
   TrendingUp,
@@ -39,15 +33,8 @@ import {
   Assessment,
   Download,
   Refresh,
-  Visibility,
-  VisibilityOff,
-  BarChart,
-  PieChart,
-  ShowChart,
 } from "@mui/icons-material";
 import { PieChart as MUIPieChart } from "@mui/x-charts/PieChart";
-import { BarChart as MUIBarChart } from "@mui/x-charts/BarChart";
-import { LineChart as MUILineChart } from "@mui/x-charts/LineChart";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
@@ -60,11 +47,14 @@ const useReportData = (endpoint, params = {}) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchData = async () => {
+  const fetchData = async (newParams = {}) => {
     try {
       setLoading(true);
       setError(null);
-      const response = await axios.get(endpoint, { params });
+      const response = await axios.get(endpoint, {
+        params: { ...params, ...newParams },
+        responseType: "json",
+      });
       setData(response.data.data);
     } catch (err) {
       setError(err.message);
@@ -79,19 +69,6 @@ const useReportData = (endpoint, params = {}) => {
 
   return { data, loading, error, refetch: fetchData };
 };
-
-// Tab Panel Component
-const TabPanel = ({ children, value, index, ...other }) => (
-  <div
-    role="tabpanel"
-    hidden={value !== index}
-    id={`reports-tabpanel-${index}`}
-    aria-labelledby={`reports-tab-${index}`}
-    {...other}
-  >
-    {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
-  </div>
-);
 
 // Metric Card Component
 const MetricCard = ({
@@ -152,7 +129,13 @@ const MetricCard = ({
 );
 
 // Business Overview Component
-const BusinessOverview = ({ data, loading, error }) => {
+const BusinessOverview = ({
+  data,
+  loading,
+  error,
+  dateRange,
+  onDateRangeChange,
+}) => {
   if (loading) return <CircularProgress />;
   if (error) return <Alert severity="error">{error}</Alert>;
   if (!data) return null;
@@ -188,9 +171,30 @@ const BusinessOverview = ({ data, loading, error }) => {
 
   return (
     <Box>
-      <Typography variant="h5" gutterBottom>
-        Business Overview
-      </Typography>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={3}
+      >
+        <Typography variant="h5">Business Overview</Typography>
+        <Box display="flex" gap={2}>
+          <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <DatePicker
+              label="Start Date"
+              value={dateRange.startDate}
+              onChange={(date) => onDateRangeChange("startDate", date)}
+              slotProps={{ textField: { size: "small" } }}
+            />
+            <DatePicker
+              label="End Date"
+              value={dateRange.endDate}
+              onChange={(date) => onDateRangeChange("endDate", date)}
+              slotProps={{ textField: { size: "small" } }}
+            />
+          </LocalizationProvider>
+        </Box>
+      </Box>
 
       <Grid container spacing={3} mb={4}>
         <Grid item xs={12} sm={6} md={3}>
@@ -268,673 +272,162 @@ const BusinessOverview = ({ data, loading, error }) => {
   );
 };
 
-// Patient Analytics Component
-const PatientAnalytics = ({ data, loading, error }) => {
-  const [period, setPeriod] = useState("monthly");
-
-  if (loading) return <CircularProgress />;
-  if (error) return <Alert severity="error">{error}</Alert>;
-  if (!data) return null;
-
-  const { registrationTrends, ageGroups, healthConditions, retention } = data;
-
-  const registrationData = registrationTrends.map((trend, index) => ({
-    period: trend.period,
-    newPatients: trend.newPatients,
-  }));
-
-  const ageGroupData = ageGroups.map((group, index) => ({
-    ageGroup: group.ageGroup,
-    count: group.count,
-  }));
-
+// Export Dialog Component
+const ExportDialog = ({
+  open,
+  onClose,
+  onExport,
+  format,
+  setFormat,
+  loading,
+}) => {
   return (
-    <Box>
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        mb={3}
-      >
-        <Typography variant="h5">Patient Analytics</Typography>
-        <FormControl sx={{ minWidth: 120 }}>
-          <InputLabel>Period</InputLabel>
-          <Select
-            value={period}
-            label="Period"
-            onChange={(e) => setPeriod(e.target.value)}
-          >
-            <MenuItem value="daily">Daily</MenuItem>
-            <MenuItem value="weekly">Weekly</MenuItem>
-            <MenuItem value="monthly">Monthly</MenuItem>
-          </Select>
-        </FormControl>
-      </Box>
-
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={8}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Patient Registration Trends
-            </Typography>
-            <MUILineChart
-              xAxis={[{ dataKey: "period", scaleType: "band" }]}
-              series={[
-                {
-                  dataKey: "newPatients",
-                  label: "New Patients",
-                  color: "#2196f3",
-                },
-              ]}
-              width={600}
-              height={300}
-              dataset={registrationData}
-            />
-          </Paper>
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Patient Retention
-            </Typography>
-            <Box textAlign="center">
-              <Typography variant="h3" color="primary">
-                {retention.retentionRate}%
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                Retention Rate
-              </Typography>
-              <Typography variant="body2" mt={1}>
-                {retention.recentPatients} active in last 30 days
-              </Typography>
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+      <DialogTitle>Export Business Overview Report</DialogTitle>
+      <DialogContent>
+        <Box sx={{ pt: 2 }}>
+          <FormControl fullWidth>
+            <InputLabel>Format</InputLabel>
+            <Select
+              value={format}
+              label="Format"
+              onChange={(e) => setFormat(e.target.value)}
+              disabled={loading}
+            >
+              <MenuItem value="csv">CSV</MenuItem>
+              <MenuItem value="json">JSON</MenuItem>
+            </Select>
+          </FormControl>
+          {loading && (
+            <Box sx={{ mt: 2, display: "flex", alignItems: "center", gap: 1 }}>
+              <CircularProgress size={20} />
+              <Typography variant="body2">Exporting report...</Typography>
             </Box>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Age Distribution
-            </Typography>
-            <MUIBarChart
-              xAxis={[{ dataKey: "ageGroup", scaleType: "band" }]}
-              series={[
-                {
-                  dataKey: "count",
-                  label: "Count",
-                  color: "#4caf50",
-                },
-              ]}
-              width={500}
-              height={300}
-              dataset={ageGroupData}
-            />
-          </Paper>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Common Health Conditions
-            </Typography>
-            <Box>
-              {healthConditions.slice(0, 8).map((condition, index) => (
-                <Chip
-                  key={index}
-                  label={`${condition.condition} (${condition.count})`}
-                  sx={{ m: 0.5 }}
-                  color="primary"
-                  variant="outlined"
-                />
-              ))}
-            </Box>
-          </Paper>
-        </Grid>
-      </Grid>
-    </Box>
-  );
-};
-
-// Care Navigator Performance Component
-const CareNavigatorPerformance = ({ data, loading, error }) => {
-  if (loading) return <CircularProgress />;
-  if (error) return <Alert severity="error">{error}</Alert>;
-  if (!data) return null;
-
-  return (
-    <Box>
-      <Typography variant="h5" gutterBottom>
-        Care Navigator Performance
-      </Typography>
-
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Care Plans</TableCell>
-              <TableCell>Completion Rate</TableCell>
-              <TableCell>Appointments</TableCell>
-              <TableCell>Appointment Rate</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {data.map((navigator) => (
-              <TableRow key={navigator.id}>
-                <TableCell>{navigator.name}</TableCell>
-                <TableCell>
-                  <Chip
-                    label={navigator.status}
-                    color={
-                      navigator.status === "Active" ? "success" : "default"
-                    }
-                    size="small"
-                  />
-                </TableCell>
-                <TableCell>
-                  {navigator.carePlans.total} ({navigator.carePlans.active}{" "}
-                  active)
-                </TableCell>
-                <TableCell>
-                  <Box display="flex" alignItems="center">
-                    <Typography
-                      color={
-                        navigator.carePlans.completionRate > 70
-                          ? "success.main"
-                          : "warning.main"
-                      }
-                      mr={1}
-                    >
-                      {navigator.carePlans.completionRate}%
-                    </Typography>
-                    <LinearProgress
-                      variant="determinate"
-                      value={navigator.carePlans.completionRate}
-                      sx={{ width: 60, height: 8, borderRadius: 4 }}
-                      color={
-                        navigator.carePlans.completionRate > 70
-                          ? "success"
-                          : "warning"
-                      }
-                    />
-                  </Box>
-                </TableCell>
-                <TableCell>{navigator.appointments.total}</TableCell>
-                <TableCell>
-                  <Box display="flex" alignItems="center">
-                    <Typography
-                      color={
-                        navigator.appointments.completionRate > 80
-                          ? "success.main"
-                          : "warning.main"
-                      }
-                      mr={1}
-                    >
-                      {navigator.appointments.completionRate}%
-                    </Typography>
-                    <LinearProgress
-                      variant="determinate"
-                      value={navigator.appointments.completionRate}
-                      sx={{ width: 60, height: 8, borderRadius: 4 }}
-                      color={
-                        navigator.appointments.completionRate > 80
-                          ? "success"
-                          : "warning"
-                      }
-                    />
-                  </Box>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Box>
-  );
-};
-
-// Appointment Analytics Component
-const AppointmentAnalytics = ({ data, loading, error }) => {
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
-
-  if (loading) return <CircularProgress />;
-  if (error) return <Alert severity="error">{error}</Alert>;
-  if (!data) return null;
-
-  const { trends, statusDistribution, peakTimes, avgDuration } = data;
-
-  const appointmentTrendData = trends.map((trend, index) => ({
-    date: trend.date,
-    total: trend.totalAppointments,
-    completed: trend.completed,
-    cancelled: trend.cancelled,
-  }));
-
-  const statusData = statusDistribution.map((status, index) => ({
-    status: status.status,
-    count: status.count,
-    percentage: status.percentage,
-  }));
-
-  const peakTimeData = peakTimes.map((peak, index) => ({
-    hour: `${peak.hour}:00`,
-    count: peak.appointmentCount,
-  }));
-
-  return (
-    <Box>
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        mb={3}
-      >
-        <Typography variant="h5">Appointment Analytics</Typography>
-        <Box display="flex" gap={2}>
-          <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <DatePicker
-              label="Start Date"
-              value={startDate}
-              onChange={setStartDate}
-              renderInput={(params) => <TextField {...params} size="small" />}
-            />
-            <DatePicker
-              label="End Date"
-              value={endDate}
-              onChange={setEndDate}
-              renderInput={(params) => <TextField {...params} size="small" />}
-            />
-          </LocalizationProvider>
+          )}
         </Box>
-      </Box>
-
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={8}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Appointment Trends
-            </Typography>
-            <MUILineChart
-              xAxis={[{ dataKey: "date", scaleType: "band" }]}
-              series={[
-                {
-                  dataKey: "total",
-                  label: "Total",
-                  color: "#2196f3",
-                },
-                {
-                  dataKey: "completed",
-                  label: "Completed",
-                  color: "#4caf50",
-                },
-                {
-                  dataKey: "cancelled",
-                  label: "Cancelled",
-                  color: "#f44336",
-                },
-              ]}
-              width={600}
-              height={300}
-              dataset={appointmentTrendData}
-            />
-          </Paper>
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Average Duration
-            </Typography>
-            <Box textAlign="center">
-              <Typography variant="h3" color="primary">
-                {avgDuration} min
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                Average Appointment Duration
-              </Typography>
-            </Box>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Status Distribution
-            </Typography>
-            <MUIPieChart
-              series={[
-                {
-                  data: statusData.map((status, index) => ({
-                    id: index,
-                    value: status.count,
-                    label: `${status.status} ${status.percentage}%`,
-                    color:
-                      status.status === "completed"
-                        ? "#4caf50"
-                        : status.status === "cancelled"
-                        ? "#f44336"
-                        : "#ff9800",
-                  })),
-                },
-              ]}
-              width={350}
-              height={200}
-            />
-          </Paper>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Peak Appointment Times
-            </Typography>
-            <MUIBarChart
-              xAxis={[{ dataKey: "hour", scaleType: "band" }]}
-              series={[
-                {
-                  dataKey: "count",
-                  label: "Appointments",
-                  color: "#ff9800",
-                },
-              ]}
-              width={500}
-              height={300}
-              dataset={peakTimeData}
-            />
-          </Paper>
-        </Grid>
-      </Grid>
-    </Box>
-  );
-};
-
-// Care Plan Effectiveness Component
-const CarePlanEffectiveness = ({ data, loading, error }) => {
-  if (loading) return <CircularProgress />;
-  if (error) return <Alert severity="error">{error}</Alert>;
-  if (!data) return null;
-
-  const { statusDistribution, completionTrends, durationStats, commonActions } =
-    data;
-
-  const statusData = statusDistribution.map((status, index) => ({
-    id: index,
-    value: status.count,
-    label: `${status.status} ${status.percentage}%`,
-    color:
-      status.status === "completed"
-        ? "#4caf50"
-        : status.status === "active"
-        ? "#2196f3"
-        : "#ff9800",
-  }));
-
-  const completionData = completionTrends.map((trend, index) => ({
-    month: trend.month,
-    rate: trend.completionRate,
-  }));
-
-  return (
-    <Box>
-      <Typography variant="h5" gutterBottom>
-        Care Plan Effectiveness
-      </Typography>
-
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Status Distribution
-            </Typography>
-            <MUIPieChart
-              series={[
-                {
-                  data: statusData,
-                },
-              ]}
-              width={350}
-              height={200}
-            />
-          </Paper>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Completion Trends
-            </Typography>
-            <MUILineChart
-              xAxis={[{ dataKey: "month", scaleType: "band" }]}
-              series={[
-                {
-                  dataKey: "rate",
-                  label: "Completion Rate %",
-                  color: "#4caf50",
-                },
-              ]}
-              width={500}
-              height={300}
-              dataset={completionData}
-            />
-          </Paper>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Duration Statistics
-            </Typography>
-            <Grid container spacing={2}>
-              <Grid item xs={4}>
-                <Box textAlign="center">
-                  <Typography variant="h4" color="primary">
-                    {Math.round(durationStats.avgDuration || 0)}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    Avg Days
-                  </Typography>
-                </Box>
-              </Grid>
-              <Grid item xs={4}>
-                <Box textAlign="center">
-                  <Typography variant="h4" color="success.main">
-                    {durationStats.minDuration || 0}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    Min Days
-                  </Typography>
-                </Box>
-              </Grid>
-              <Grid item xs={4}>
-                <Box textAlign="center">
-                  <Typography variant="h4" color="warning.main">
-                    {durationStats.maxDuration || 0}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    Max Days
-                  </Typography>
-                </Box>
-              </Grid>
-            </Grid>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Common Actions
-            </Typography>
-            <Box>
-              {commonActions.slice(0, 6).map((action, index) => (
-                <Chip
-                  key={index}
-                  label={`${action.actions} (${action.count})`}
-                  sx={{ m: 0.5 }}
-                  color="secondary"
-                  variant="outlined"
-                />
-              ))}
-            </Box>
-          </Paper>
-        </Grid>
-      </Grid>
-    </Box>
-  );
-};
-
-// System Usage Component
-const SystemUsage = ({ data, loading, error }) => {
-  if (loading) return <CircularProgress />;
-  if (error) return <Alert severity="error">{error}</Alert>;
-  if (!data) return null;
-
-  const { adminMetrics, messageMetrics, systemHealth, recentActivity } = data;
-
-  return (
-    <Box>
-      <Typography variant="h5" gutterBottom>
-        System Usage Analytics
-      </Typography>
-
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={4}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Admin Metrics
-            </Typography>
-            <Box>
-              <Typography variant="h4" color="primary">
-                {adminMetrics.total}
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                Total Admins
-              </Typography>
-              <Typography variant="body2" mt={1}>
-                {adminMetrics.active} Active, {adminMetrics.inactive} Inactive
-              </Typography>
-            </Box>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Message Metrics
-            </Typography>
-            <Box>
-              <Typography variant="h4" color="primary">
-                {messageMetrics.total}
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                Total Messages
-              </Typography>
-              <Typography variant="body2" mt={1}>
-                {messageMetrics.sendRate}% Send Rate
-              </Typography>
-            </Box>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              System Health
-            </Typography>
-            <Box>
-              <Typography variant="h4" color="primary">
-                {systemHealth.totalUsers}
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                Total Users
-              </Typography>
-              <Typography variant="body2" mt={1}>
-                {systemHealth.growthRate}% Growth Rate
-              </Typography>
-            </Box>
-          </Paper>
-        </Grid>
-        <Grid item xs={12}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Recent Activity
-            </Typography>
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Type</TableCell>
-                    <TableCell>User</TableCell>
-                    <TableCell>Action</TableCell>
-                    <TableCell>Timestamp</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {recentActivity.slice(0, 10).map((activity, index) => (
-                    <TableRow key={index}>
-                      <TableCell>
-                        <Chip
-                          label={activity.type}
-                          color={
-                            activity.type === "appointment"
-                              ? "primary"
-                              : "secondary"
-                          }
-                          size="small"
-                        />
-                      </TableCell>
-                      <TableCell>{activity.user}</TableCell>
-                      <TableCell>{activity.action}</TableCell>
-                      <TableCell>
-                        {new Date(activity.timestamp).toLocaleString()}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Paper>
-        </Grid>
-      </Grid>
-    </Box>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose} disabled={loading}>
+          Cancel
+        </Button>
+        <Button
+          onClick={() => onExport(format)}
+          disabled={loading}
+          variant="contained"
+          color="primary"
+        >
+          Export
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 
 // Main Reports Component
 const Reports = () => {
-  const [tabValue, setTabValue] = useState(0);
   const [dateRange, setDateRange] = useState({
     startDate: null,
     endDate: null,
   });
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [exportFormat, setExportFormat] = useState("csv");
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+  const [exportLoading, setExportLoading] = useState(false);
 
-  // Fetch data for different sections
+  // Fetch business overview data
   const businessOverview = useReportData(
     API_ENDPOINTS.REPORTS.BUSINESS_OVERVIEW,
     dateRange
   );
-  const patientAnalytics = useReportData(
-    API_ENDPOINTS.REPORTS.PATIENT_ANALYTICS
-  );
-  const careNavigatorPerformance = useReportData(
-    API_ENDPOINTS.REPORTS.CARE_NAVIGATOR_PERFORMANCE
-  );
-  const appointmentAnalytics = useReportData(
-    API_ENDPOINTS.REPORTS.APPOINTMENT_ANALYTICS,
-    dateRange
-  );
-  const carePlanEffectiveness = useReportData(
-    API_ENDPOINTS.REPORTS.CARE_PLAN_EFFECTIVENESS
-  );
-  const systemUsage = useReportData(API_ENDPOINTS.REPORTS.SYSTEM_USAGE);
 
-  const handleTabChange = (event, newValue) => {
-    setTabValue(newValue);
-  };
+  // Refetch data when date range changes
+  useEffect(() => {
+    if (dateRange.startDate || dateRange.endDate) {
+      businessOverview.refetch();
+    }
+  }, [dateRange.startDate, dateRange.endDate]);
 
   const handleRefresh = () => {
     businessOverview.refetch();
-    patientAnalytics.refetch();
-    careNavigatorPerformance.refetch();
-    appointmentAnalytics.refetch();
-    carePlanEffectiveness.refetch();
-    systemUsage.refetch();
+    setSnackbar({
+      open: true,
+      message: "Data refreshed successfully",
+      severity: "success",
+    });
   };
 
-  const handleExport = () => {
-    // TODO: Implement export functionality
-    console.log("Export functionality to be implemented");
+  const handleDateRangeChange = (field, value) => {
+    setDateRange((prev) => ({ ...prev, [field]: value }));
+
+    // Add a small delay to avoid too many API calls
+    setTimeout(() => {
+      businessOverview.refetch();
+    }, 500);
+  };
+
+  const handleExport = async (format) => {
+    try {
+      setExportLoading(true);
+      const params = {
+        format,
+        ...(dateRange.startDate && {
+          startDate: dateRange.startDate.toISOString().split("T")[0],
+        }),
+        ...(dateRange.endDate && {
+          endDate: dateRange.endDate.toISOString().split("T")[0],
+        }),
+      };
+
+      const response = await axios.get(API_ENDPOINTS.REPORTS.EXPORT, {
+        params,
+        responseType: "blob",
+      });
+
+      // Create download link
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute(
+        "download",
+        `business-overview-${new Date().toISOString().split("T")[0]}.${format}`
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      setSnackbar({
+        open: true,
+        message: "Report exported successfully",
+        severity: "success",
+      });
+      setExportDialogOpen(false);
+    } catch (error) {
+      console.error("Export error:", error);
+      setSnackbar({
+        open: true,
+        message: "Failed to export report",
+        severity: "error",
+      });
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
+  const handleExportClick = () => {
+    setExportDialogOpen(true);
+  };
+
+  const handleCloseExportDialog = () => {
+    setExportDialogOpen(false);
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
   };
 
   return (
@@ -947,7 +440,7 @@ const Reports = () => {
           mb={3}
         >
           <Typography variant="h4" className="text-[#09D1C7]">
-            Reports & Analytics
+            Business Overview Report
           </Typography>
           <Box display="flex" gap={2}>
             <Tooltip title="Refresh Data">
@@ -956,47 +449,39 @@ const Reports = () => {
               </IconButton>
             </Tooltip>
             <Tooltip title="Export Report">
-              <IconButton onClick={handleExport} color="primary">
+              <IconButton onClick={handleExportClick} color="primary">
                 <Download />
               </IconButton>
             </Tooltip>
           </Box>
         </Box>
 
-        <Paper sx={{ width: "100%" }}>
-          <Tabs
-            value={tabValue}
-            onChange={handleTabChange}
-            aria-label="reports tabs"
-            sx={{ borderBottom: 1, borderColor: "divider" }}
-          >
-            <Tab label="Business Overview" />
-            <Tab label="Patient Analytics" />
-            <Tab label="Care Navigator Performance" />
-            <Tab label="Appointment Analytics" />
-            <Tab label="Care Plan Effectiveness" />
-            <Tab label="System Usage" />
-          </Tabs>
-
-          <TabPanel value={tabValue} index={0}>
-            <BusinessOverview {...businessOverview} />
-          </TabPanel>
-          <TabPanel value={tabValue} index={1}>
-            <PatientAnalytics {...patientAnalytics} />
-          </TabPanel>
-          <TabPanel value={tabValue} index={2}>
-            <CareNavigatorPerformance {...careNavigatorPerformance} />
-          </TabPanel>
-          <TabPanel value={tabValue} index={3}>
-            <AppointmentAnalytics {...appointmentAnalytics} />
-          </TabPanel>
-          <TabPanel value={tabValue} index={4}>
-            <CarePlanEffectiveness {...carePlanEffectiveness} />
-          </TabPanel>
-          <TabPanel value={tabValue} index={5}>
-            <SystemUsage {...systemUsage} />
-          </TabPanel>
+        <Paper sx={{ width: "100%", p: 3 }}>
+          <BusinessOverview
+            {...businessOverview}
+            dateRange={dateRange}
+            onDateRangeChange={handleDateRangeChange}
+          />
         </Paper>
+
+        <ExportDialog
+          open={exportDialogOpen}
+          onClose={handleCloseExportDialog}
+          onExport={handleExport}
+          format={exportFormat}
+          setFormat={setExportFormat}
+          loading={exportLoading}
+        />
+
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={6000}
+          onClose={handleCloseSnackbar}
+        >
+          <Alert onClose={handleCloseSnackbar} severity={snackbar.severity}>
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
       </Box>
     </LocalizationProvider>
   );

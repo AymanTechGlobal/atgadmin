@@ -49,11 +49,7 @@ export const API_ENDPOINTS = {
   // Reports endpoints
   REPORTS: {
     BUSINESS_OVERVIEW: `${API_BASE_URL}/api/reports/business-overview`,
-    PATIENT_ANALYTICS: `${API_BASE_URL}/api/reports/patient-analytics`,
-    CARE_NAVIGATOR_PERFORMANCE: `${API_BASE_URL}/api/reports/care-navigator-performance`,
-    APPOINTMENT_ANALYTICS: `${API_BASE_URL}/api/reports/appointment-analytics`,
-    CARE_PLAN_EFFECTIVENESS: `${API_BASE_URL}/api/reports/care-plan-effectiveness`,
-    SYSTEM_USAGE: `${API_BASE_URL}/api/reports/system-usage`,
+    EXPORT: `${API_BASE_URL}/api/reports/export`,
   },
 };
 
