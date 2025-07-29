@@ -102,6 +102,7 @@ const CareNavigators = () => {
         phone: navigator.phone,
         status: navigator.status,
         username: navigator.username.replace("cn_", ""),
+        calendlyName: navigator.calendlyName || "",
       });
     } else {
       setSelectedNavigator(null);
@@ -125,15 +126,66 @@ const CareNavigators = () => {
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+
+    // Special handling for phone number
+    if (name === "phone") {
+      // Only allow digits and limit to 10 characters
+      const phoneValue = value.replace(/\D/g, "").slice(0, 10);
+      setFormData((prev) => ({
+        ...prev,
+        [name]: phoneValue,
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   const handleSubmit = async () => {
     setLoading(true);
     setError(null);
+
+    // Client-side validation
+    if (!formData.name.trim()) {
+      setError("Name is required");
+      setLoading(false);
+      return;
+    }
+
+    if (!formData.email.trim()) {
+      setError("Email is required");
+      setLoading(false);
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError("Please enter a valid email address");
+      setLoading(false);
+      return;
+    }
+
+    if (!formData.phone || formData.phone.length !== 10) {
+      setError("Phone number must be exactly 10 digits");
+      setLoading(false);
+      return;
+    }
+
+    if (!formData.username.trim()) {
+      setError("Username is required");
+      setLoading(false);
+      return;
+    }
+
+    if (!formData.calendlyName.trim()) {
+      setError("Calendly Name is required");
+      setLoading(false);
+      return;
+    }
+
     try {
       const token = localStorage.getItem("token");
       if (selectedNavigator) {
@@ -164,10 +216,24 @@ const CareNavigators = () => {
         }
       }
     } catch (error) {
-      if (error.response?.data?.errors) {
+      console.error("Error in handleSubmit:", error.response?.data);
+
+      // Handle different error response formats
+      if (
+        error.response?.data?.errors &&
+        Array.isArray(error.response.data.errors)
+      ) {
+        // Handle array of errors
         setError(error.response.data.errors.join(", "));
+      } else if (error.response?.data?.error) {
+        // Handle single error message
+        setError(error.response.data.error);
+      } else if (error.response?.data?.message) {
+        // Handle message field
+        setError(error.response.data.message);
       } else {
-        setError(error.response?.data?.message || "An error occurred");
+        // Fallback error message
+        setError("An error occurred while saving the care navigator");
       }
     } finally {
       setLoading(false);
@@ -209,23 +275,27 @@ const CareNavigators = () => {
     setLoading(true);
 
     if (!formData.username || !formData.tempPWD) {
-      setError("Both Username and Temporary Password are required to reset the temporary password.");
+      setError(
+        "Both Username and Temporary Password are required to reset the temporary password."
+      );
       setLoading(false);
       return;
     }
 
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.post(`${API_URL}/resend-temp-password`, 
+      const response = await axios.post(
+        `${API_URL}/resend-temp-password`,
         {
           username: formData.username,
           tempPWD: formData.tempPWD,
-        }, 
-        {
-        headers: {
-          Authorization: `Bearer ${token}`,
         },
-      });
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (response.data.success) {
         setSuccess("Temporary password updated successfully");
@@ -245,7 +315,9 @@ const CareNavigators = () => {
       if (error.response?.data?.errors) {
         setError(error.response.data.errors.join(", "));
       } else {
-        setError(error.response?.data?.message || "Error updating temporary password");
+        setError(
+          error.response?.data?.message || "Error updating temporary password"
+        );
       }
     } finally {
       setLoading(false);
