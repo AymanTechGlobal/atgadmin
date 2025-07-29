@@ -1,10 +1,3 @@
-// Login page for the admin panel
-// uses the backend/routes/login.js to authenticate the user
-// uses the backend/routes/adminController.js to get the admin data
-// public route --> no authentication required
-// use password hashing to secure the password
-// uses the jwt to authenticate the user
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
@@ -16,43 +9,32 @@ import {
   Typography,
   TextField,
   Button,
-  Checkbox,
-  FormControlLabel,
-  Link,
   CircularProgress,
   Alert,
+  Link,
 } from "@mui/material";
-import { LockOutlined as LockIcon } from "@mui/icons-material";
+import { Email as EmailIcon } from "@mui/icons-material";
 
-const Login = () => {
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-  const [rememberMe, setRememberMe] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+const ForgotPassword = () => {
+  const [email, setEmail] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { requestPasswordReset } = useAuth();
 
-  const { email, password } = formData;
-
-  const onChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    setError("");
-  };
-
-  const onSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
+    setSuccess("");
 
     try {
-      const result = await login(email, password, rememberMe);
+      const result = await requestPasswordReset(email);
 
       if (result.success) {
-        navigate("/Dashboard");
+        setSuccess(result.message);
+        setEmail("");
       } else {
         setError(result.error);
       }
@@ -71,10 +53,10 @@ const Login = () => {
           variant="h3"
           className="font-bold text-indigo-700 mb-2 tracking-tight"
         >
-          ATG Admin
+          Forgot Password
         </Typography>
         <Typography variant="subtitle1" className="text-gray-600 text-lg">
-          Login to the admin panel
+          Enter your email to reset your password
         </Typography>
       </Box>
 
@@ -91,18 +73,18 @@ const Login = () => {
             />
           </Box>
 
-          {/* Login Form */}
+          {/* Forgot Password Form */}
           <Paper
             elevation={3}
             className="w-full md:w-1/2 max-w-md p-8 rounded-xl"
           >
             <Box className="text-center mb-6">
-              <LockIcon className="text-4xl text-indigo-600 mb-2" />
+              <EmailIcon className="text-4xl text-indigo-600 mb-2" />
               <Typography variant="h5" className="font-semibold text-gray-900">
-                Welcome Back
+                Reset Your Password
               </Typography>
               <Typography variant="body2" className="text-gray-600 mt-1">
-                Sign in to access your account
+                We'll send you a link to reset your password
               </Typography>
             </Box>
 
@@ -112,62 +94,24 @@ const Login = () => {
               </Alert>
             )}
 
-            <form onSubmit={onSubmit} className="space-y-6">
+            {success && (
+              <Alert severity="success" className="mb-4">
+                {success}
+              </Alert>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-6">
               <TextField
                 fullWidth
                 label="Email Address"
-                name="email"
                 type="email"
                 value={email}
-                onChange={onChange}
+                onChange={(e) => setEmail(e.target.value)}
                 required
                 variant="outlined"
                 className="bg-white"
                 InputProps={{ className: "rounded-lg" }}
               />
-
-              <TextField
-                fullWidth
-                label="Password"
-                name="password"
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={onChange}
-                required
-                variant="outlined"
-                className="bg-white"
-                InputProps={{
-                  className: "rounded-lg",
-                  endAdornment: (
-                    <Button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="min-w-0 p-1"
-                    >
-                      {showPassword ? "Hide" : "Show"}
-                    </Button>
-                  ),
-                }}
-              />
-
-              <Box className="flex items-center justify-between">
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      color="primary"
-                      checked={rememberMe}
-                      onChange={(e) => setRememberMe(e.target.checked)}
-                    />
-                  }
-                  label="Remember me"
-                />
-                <Link
-                  href="/forgot-password"
-                  className="text-indigo-600 hover:text-indigo-500"
-                >
-                  Forgot password?
-                </Link>
-              </Box>
 
               <Button
                 type="submit"
@@ -181,19 +125,19 @@ const Login = () => {
                 {loading ? (
                   <CircularProgress size={24} color="inherit" />
                 ) : (
-                  "Sign In"
+                  "Send Reset Link"
                 )}
               </Button>
             </form>
 
             <Box className="mt-6 text-center">
               <Typography variant="body2" className="text-gray-600">
-                Don't have an account?{" "}
+                Remember your password?{" "}
                 <Link
-                  href="/register"
+                  href="/login"
                   className="text-indigo-600 hover:text-indigo-500"
                 >
-                  Contact Administrator
+                  Sign in here
                 </Link>
               </Typography>
             </Box>
@@ -204,4 +148,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default ForgotPassword;

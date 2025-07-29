@@ -1,10 +1,7 @@
-// This page is used to reset the password for the admin
-// still under development
-
-import React, { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
-import { API_ENDPOINTS } from "../config/api";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import { useAuth } from "../context/AuthContext";
 import {
   Box,
   Container,
@@ -14,42 +11,60 @@ import {
   Button,
   CircularProgress,
   Alert,
+  Link,
 } from "@mui/material";
 import { LockReset as LockResetIcon } from "@mui/icons-material";
 
 const ResetPassword = () => {
-  const [email, setEmail] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [formData, setFormData] = useState({
+    newPassword: "",
+    confirmPassword: "",
+  });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { token } = useParams();
+  const { resetPassword } = useAuth();
 
-  const handleRequestReset = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-    setSuccess("");
+  const token = searchParams.get("token");
 
-    try {
-      const response = await axios.post(API_ENDPOINTS.RESET_PASSWORD_REQUEST, {
-        email,
-      });
-      setSuccess(response.data.message);
-    } catch (err) {
-      setError(err.response?.data?.message || "An error occurred");
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (!token) {
+      setError("Invalid reset link. Please request a new password reset.");
     }
+  }, [token]);
+
+  const { newPassword, confirmPassword } = formData;
+
+  const onChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setError("");
   };
 
-  const handleResetPassword = async (e) => {
+  const validatePassword = (password) => {
+    const minLength = 6;
+    if (password.length < minLength) {
+      return `Password must be at least ${minLength} characters long`;
+    }
+    return null;
+  };
+
+  const onSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
     setSuccess("");
+
+    // Validate passwords
+    const passwordError = validatePassword(newPassword);
+    if (passwordError) {
+      setError(passwordError);
+      setLoading(false);
+      return;
+    }
 
     if (newPassword !== confirmPassword) {
       setError("Passwords do not match");
@@ -58,119 +73,188 @@ const ResetPassword = () => {
     }
 
     try {
-      const response = await axios.post(API_ENDPOINTS.RESET_PASSWORD, {
-        token,
-        newPassword,
-      });
-      setSuccess(response.data.message);
-      setTimeout(() => navigate("/login"), 2000);
+      const result = await resetPassword(token, newPassword);
+
+      if (result.success) {
+        setSuccess(result.message);
+        setTimeout(() => {
+          navigate("/login");
+        }, 3000);
+      } else {
+        setError(result.error);
+      }
     } catch (err) {
-      setError(err.response?.data?.message || "An error occurred");
+      setError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <Box className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col items-center justify-start pt-12 px-4">
-      <Container maxWidth="sm">
-        <Paper elevation={3} className="p-8 rounded-xl">
-          <Box className="text-center mb-6">
-            <LockResetIcon className="text-4xl text-indigo-600 mb-2" />
-            <Typography variant="h5" className="font-semibold text-gray-900">
-              {token ? "Reset Your Password" : "Request Password Reset"}
+  if (!token) {
+    return (
+      <Box className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col items-center justify-center px-4">
+        <Paper elevation={3} className="p-8 rounded-xl max-w-md w-full">
+          <Box className="text-center">
+            <LockResetIcon className="text-4xl text-red-500 mb-4" />
+            <Typography
+              variant="h5"
+              className="font-semibold text-gray-900 mb-2"
+            >
+              Invalid Reset Link
             </Typography>
-            <Typography variant="body2" className="text-gray-600 mt-1">
-              {token
-                ? "Enter your new password below"
-                : "Enter your email to receive reset instructions"}
+            <Typography variant="body2" className="text-gray-600 mb-6">
+              The password reset link is invalid or has expired.
             </Typography>
-          </Box>
-
-          {error && (
-            <Alert severity="error" className="mb-4">
-              {error}
-            </Alert>
-          )}
-
-          {success && (
-            <Alert severity="success" className="mb-4">
-              {success}
-            </Alert>
-          )}
-
-          <form onSubmit={token ? handleResetPassword : handleRequestReset}>
-            {!token ? (
-              <TextField
-                fullWidth
-                label="Email Address"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                variant="outlined"
-                className="mb-4"
-                InputProps={{ className: "rounded-lg" }}
-              />
-            ) : (
-              <>
-                <TextField
-                  fullWidth
-                  label="New Password"
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  required
-                  variant="outlined"
-                  className="mb-4"
-                  InputProps={{ className: "rounded-lg" }}
-                />
-                <TextField
-                  fullWidth
-                  label="Confirm Password"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  variant="outlined"
-                  className="mb-4"
-                  InputProps={{ className: "rounded-lg" }}
-                />
-              </>
-            )}
-
             <Button
-              type="submit"
-              fullWidth
               variant="contained"
               color="primary"
-              size="large"
-              disabled={loading}
-              className="h-12 rounded-lg text-base font-semibold"
+              onClick={() => navigate("/forgot-password")}
+              className="w-full"
             >
-              {loading ? (
-                <CircularProgress size={24} color="inherit" />
-              ) : token ? (
-                "Reset Password"
-              ) : (
-                "Send Reset Link"
-              )}
+              Request New Reset Link
             </Button>
-          </form>
-
-          <Box className="mt-6 text-center">
-            <Typography variant="body2" className="text-gray-600">
-              Remember your password?{" "}
-              <Button
-                color="primary"
-                onClick={() => navigate("/")}
-                className="text-indigo-600 hover:text-indigo-500"
-              >
-                Back to Login
-              </Button>
-            </Typography>
           </Box>
         </Paper>
+      </Box>
+    );
+  }
+
+  return (
+    <Box className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col items-center justify-start pt-12 px-4">
+      {/* Page Title */}
+      <Box className="text-center mb-10">
+        <Typography
+          variant="h3"
+          className="font-bold text-indigo-700 mb-2 tracking-tight"
+        >
+          Reset Password
+        </Typography>
+        <Typography variant="subtitle1" className="text-gray-600 text-lg">
+          Enter your new password
+        </Typography>
+      </Box>
+
+      {/* Main Content */}
+      <Container maxWidth="lg">
+        <Box className="flex flex-col md:flex-row items-center justify-center gap-12">
+          {/* Lottie Animation */}
+          <Box className="w-full md:w-1/2 flex justify-center">
+            <DotLottieReact
+              src="https://lottie.host/d71dadf7-4865-4156-b66d-89ba8b7931a0/wLN2Qpkiu7.lottie"
+              loop
+              autoplay
+              className="w-[280px] h-[280px] md:w-[320px] md:h-[320px]"
+            />
+          </Box>
+
+          {/* Reset Password Form */}
+          <Paper
+            elevation={3}
+            className="w-full md:w-1/2 max-w-md p-8 rounded-xl"
+          >
+            <Box className="text-center mb-6">
+              <LockResetIcon className="text-4xl text-indigo-600 mb-2" />
+              <Typography variant="h5" className="font-semibold text-gray-900">
+                Set New Password
+              </Typography>
+              <Typography variant="body2" className="text-gray-600 mt-1">
+                Choose a strong password for your account
+              </Typography>
+            </Box>
+
+            {error && (
+              <Alert severity="error" className="mb-4">
+                {error}
+              </Alert>
+            )}
+
+            {success && (
+              <Alert severity="success" className="mb-4">
+                {success}
+              </Alert>
+            )}
+
+            <form onSubmit={onSubmit} className="space-y-6">
+              <TextField
+                fullWidth
+                label="New Password"
+                name="newPassword"
+                type={showPassword ? "text" : "password"}
+                value={newPassword}
+                onChange={onChange}
+                required
+                variant="outlined"
+                className="bg-white"
+                InputProps={{
+                  className: "rounded-lg",
+                  endAdornment: (
+                    <Button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="min-w-0 p-1"
+                    >
+                      {showPassword ? "Hide" : "Show"}
+                    </Button>
+                  ),
+                }}
+              />
+
+              <TextField
+                fullWidth
+                label="Confirm New Password"
+                name="confirmPassword"
+                type={showConfirmPassword ? "text" : "password"}
+                value={confirmPassword}
+                onChange={onChange}
+                required
+                variant="outlined"
+                className="bg-white"
+                InputProps={{
+                  className: "rounded-lg",
+                  endAdornment: (
+                    <Button
+                      type="button"
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
+                      className="min-w-0 p-1"
+                    >
+                      {showConfirmPassword ? "Hide" : "Show"}
+                    </Button>
+                  ),
+                }}
+              />
+
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                color="primary"
+                size="large"
+                disabled={loading}
+                className="h-12 rounded-lg text-base font-semibold"
+              >
+                {loading ? (
+                  <CircularProgress size={24} color="inherit" />
+                ) : (
+                  "Reset Password"
+                )}
+              </Button>
+            </form>
+
+            <Box className="mt-6 text-center">
+              <Typography variant="body2" className="text-gray-600">
+                Remember your password?{" "}
+                <Link
+                  href="/login"
+                  className="text-indigo-600 hover:text-indigo-500"
+                >
+                  Sign in here
+                </Link>
+              </Typography>
+            </Box>
+          </Paper>
+        </Box>
       </Container>
     </Box>
   );

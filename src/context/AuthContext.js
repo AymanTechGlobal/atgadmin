@@ -61,18 +61,19 @@ export const AuthProvider = ({ children }) => {
     validateToken();
   }, []);
 
-  const login = async (email, password) => {
+  const login = async (email, password, rememberMe = false) => {
     try {
       const response = await axios.post(API_ENDPOINTS.LOGIN, {
         email,
         password,
+        rememberMe,
       });
 
       const { token: newToken, user: userData } = response.data;
 
       // Store token and user data
-      TokenStorage.setToken(newToken);
-      TokenStorage.setUser(userData);
+      TokenStorage.setToken(newToken, rememberMe);
+      TokenStorage.setUser(userData, rememberMe);
 
       setToken(newToken);
       setUser(userData);
@@ -101,6 +102,35 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const requestPasswordReset = async (email) => {
+    try {
+      const response = await axios.post(API_ENDPOINTS.RESET_PASSWORD_REQUEST, {
+        email,
+      });
+      return { success: true, message: response.data.message };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.message || "Failed to send reset email",
+      };
+    }
+  };
+
+  const resetPassword = async (token, newPassword) => {
+    try {
+      const response = await axios.post(API_ENDPOINTS.RESET_PASSWORD, {
+        token,
+        newPassword,
+      });
+      return { success: true, message: response.data.message };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.message || "Failed to reset password",
+      };
+    }
+  };
+
   const value = {
     user,
     token,
@@ -108,6 +138,8 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     validateToken,
+    requestPasswordReset,
+    resetPassword,
     isAuthenticated: !!token && !!user,
   };
 
