@@ -173,7 +173,6 @@ const Dashboard = () => {
             <TableHead>
               <TableRow>
                 <TableCell>User ID</TableCell>
-                <TableCell>Full Name</TableCell>
                 <TableCell>Registered At</TableCell>
               </TableRow>
             </TableHead>
@@ -181,7 +180,7 @@ const Dashboard = () => {
               {stats.recentRegistrations.map((r) => (
                 <TableRow key={r.userId}>
                   <TableCell>{r.userId}</TableCell>
-                  <TableCell>{r.fullName}</TableCell>
+                  
                   <TableCell>
                     {new Date(r.registeredAt).toLocaleDateString()}
                   </TableCell>
